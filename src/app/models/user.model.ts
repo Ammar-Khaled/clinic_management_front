@@ -44,3 +44,31 @@ export interface RegisterResponse {
   last_name: string;
   profile: PatientProfile;
 }
+
+export interface User {
+  id?: string | number;
+  username?: string;
+  email?: string;
+  role?: string;
+  first_name?: string;
+  last_name?: string;
+  is_active?: boolean;
+}
+
+// Analytics and Appointments Status mapping
+export interface DailyAppointmentStat {
+  day: string; // e.g. "Mon"
+  percentage: number;
+}
+
+export interface AppointmentStatusStat {
+  status: string;
+  percentage: number;
+  hexCode: string;
+}
+
+export interface AppointmentsAnalytics {
+  growthPercentage?: number;
+  volume?: DailyAppointmentStat[];
+  statuses?: AppointmentStatusStat[];
+}

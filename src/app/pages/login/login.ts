@@ -39,8 +39,44 @@ export class LoginComponent {
     this.errorMsg = '';
 
     this.auth.login(this.form.value).subscribe({
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+      next: (res) => {
+        let returnUrl = this.route.snapshot.queryParams['returnUrl'];
+        try {
+          const payloadStr = atob(res.access.split('.')[1]);
+          const payload = JSON.parse(payloadStr);
+          const userId = payload.user_id;
+          
+          if (userId && !returnUrl) {
+            this.auth.getUserDetails(userId).subscribe({
+              next: (user) => {
+                const role = user.role?.toUpperCase();
+                switch (role) {
+                  case 'ADMIN':
+                    returnUrl = '/admin-dashboard';
+                    break;
+                  case 'DOCTOR':
+                    returnUrl = '/doctor-slots'; // Assume doctor dashboard or slots
+                    break;
+                  case 'RECEPTIONIST':
+                    returnUrl = '/receptionist';
+                    break;
+                  case 'PATIENT':
+                  default:
+                    returnUrl = '/dashboard';
+                }
+                this.router.navigateByUrl(returnUrl);
+              },
+              error: () => this.router.navigateByUrl('/dashboard')
+            });
+            return; // Navigation handled asynchronously
+          }
+        } catch (e) {
+          console.warn('Error parsing token payload:', e);
+        }
+        
+        // Ensure returning users fallback to root if empty
+        if (!returnUrl) returnUrl = '/dashboard';
+        
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

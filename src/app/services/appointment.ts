@@ -59,6 +59,64 @@ export class AppointmentService {
     );
   }
 
+  createConsultation(appointmentId: number | string, data: any): Observable<Consultation> {
+    return this.http.post<Consultation>(`${this.api}/appointments/${appointmentId}/consultation`, data);
+  }
+
+  updateConsultation(appointmentId: number | string, data: any): Observable<Consultation> {
+    return this.http.patch<Consultation>(`${this.api}/appointments/${appointmentId}/consultation`, data);
+  }
+
+  // --- Admin & Queues ---
+
+  getAllAppointments(): Observable<Appointment[]> {
+    return this.http.get<AppointmentRaw[]>(`${this.api}/appointments/`).pipe(
+      map(raw => this.enrichList(raw))
+    );
+  }
+
+  getQueueToday(): Observable<any> {
+    return this.http.get(`${this.api}/appointments/queue/today`);
+  }
+
+  getAppointmentsAnalytics(): Observable<any> {
+    return this.http.get(`${this.api}/appointments`);
+  }
+
+  // --- Status Updates ---
+
+  confirmAppointment(id: number | string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/confirm`, { status: 'CONFIRMED' });
+  }
+
+  completeAppointment(id: number | string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/complete`, {});
+  }
+
+  checkInAppointment(id: number | string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/check-in`, { status: 'CHECKED_IN' });
+  }
+
+  noShowAppointment(id: number | string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/no-show`, {});
+  }
+
+  declineAppointment(id: number | string, reason: string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/decline`, { reason });
+  }
+
+  cancelAppointment(id: number | string, reason: string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/cancel`, { reason });
+  }
+
+  rescheduleAppointment(id: number | string, newSlotId: number, reason: string): Observable<any> {
+    return this.http.patch(`${this.api}/appointments/${id}/reschedule`, { new_slot_id: newSlotId, reason });
+  }
+
+  getRescheduleHistory(id: number | string): Observable<any> {
+    return this.http.get(`${this.api}/appointments/${id}/reschedule-history`);
+  }
+
   // --- Enrichment from cache ---
 
   private enrichOne(raw: AppointmentRaw): Appointment {

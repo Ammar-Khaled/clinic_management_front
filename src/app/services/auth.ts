@@ -40,10 +40,31 @@ export class AuthService {
       );
   }
 
+  getUserDetails(id: string): Observable<any> {
+    return this.http.get(`${this.api}/users/${id}/`);
+  }
+
+  refreshToken(refresh: string): Observable<{ access: string, refresh?: string }> {
+    return this.http.post<{ access: string, refresh?: string }>(`${this.api}/auth/token/refresh/`, { refresh }).pipe(
+      tap(res => {
+        if (res.access) localStorage.setItem('access_token', res.access);
+        if (res.refresh) localStorage.setItem('refresh_token', res.refresh);
+      })
+    );
+  }
+
   logout(): void {
     const refresh = localStorage.getItem('refresh_token');
+    const access = localStorage.getItem('access_token');
+    
     if (refresh) {
-      this.http.post(`${this.api}/auth/logout`, { refresh }).subscribe({
+      const headers: Record<string, string> = access ? { Authorization: `Bearer ${access}` } : {};
+      
+      this.http.post(
+        `${this.api}/auth/logout`, 
+        { refresh_token: refresh },
+        { headers }
+      ).subscribe({
         complete: () => this.clearSession(),
         error: () => this.clearSession()
       });
