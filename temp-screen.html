@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Curator | Admin Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symboals -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        
+        .pie-chart {
+            background: conic-gradient(
+                #3b82f6 0% 15%,     /* Requested - Blue */
+                #0ea5e9 15% 35%,    /* Confirmed - Sky */
+                #10b981 35% 55%,    /* Checked In - Emerald */
+                #059669 55% 85%,    /* Completed - Green */
+                #ef4444 85% 95%,    /* Cancelled - Red */
+                #64748b 95% 100%    /* No Show - Slate */
+            );
+            border-radius: 50%;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "on-surface": "#191c1e",
+                        "on-tertiary-container": "#8fbeff",
+                        "surface": "#f8f9fb",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "background": "#f8f9fb",
+                        "on-secondary-fixed": "#00201d",
+                        "on-primary-fixed-variant": "#173bab",
+                        "outline": "#757684",
+                        "on-error-container": "#93000a",
+                        "primary": "#00288e",
+                        "on-surface-variant": "#444653",
+                        "primary-fixed": "#dde1ff",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#1e40af",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed": "#89f5e7",
+                        "surface-container-high": "#e7e8ea",
+                        "surface-container-highest": "#e1e2e4",
+                        "tertiary-container": "#004c8b",
+                        "tertiary-fixed": "#d4e3ff",
+                        "on-tertiary-fixed": "#001c39",
+                        "inverse-primary": "#b8c4ff",
+                        "surface-tint": "#3755c3",
+                        "tertiary-fixed-dim": "#a4c9ff",
+                        "secondary": "#006a61",
+                        "on-primary-fixed": "#001453",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#005049",
+                        "on-secondary-container": "#006f66",
+                        "surface-variant": "#e1e2e4",
+                        "surface-bright": "#f8f9fb",
+                        "outline-variant": "#c4c5d5",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "surface-container": "#edeef0",
+                        "on-background": "#191c1e",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#d9dadc",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f6",
+                        "on-primary-container": "#a8b8ff",
+                        "inverse-on-surface": "#f0f1f3",
+                        "tertiary": "#003564",
+                        "secondary-container": "#86f2e4",
+                        "secondary-fixed-dim": "#6bd8cb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex justify-between items-center px-6 py-3">
+<div class="flex items-center gap-8">
+<span class="font-['Manrope'] text-xl font-bold text-blue-900">Clinical Curator</span>
+<div class="hidden md:flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-full border-none">
+<span class="material-symbols-outlined text-slate-400 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" placeholder="Search system settings or users..." type="text"/>
+</div>
+<div class="hidden lg:flex items-center gap-6 ml-4">
+<a class="text-blue-800 font-bold text-sm" href="#">Administration</a>
+<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Users &amp; Roles</a>
+<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">System Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-blue-50 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-blue-50 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden border border-slate-200">
+<img class="w-full h-full object-cover" data-alt="portrait of a professional healthcare administrator in a clean modern clinic setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkPp0VZApQj67WdlPSDIQwF8xo1Hu7j-jrFDGLvlBhO11UvGwDp9pVVaNDYm8hbjHGSzHFcqdWMzAh_Vv3TXJYwuZ71UcWvSMy03Igb1lJFczWPm61gvdFRDODFXY8y_nSyWJKFF6OEj5KaOgBuLwdqUKu0e0bFErw6L5KAHa0ASxICebUQbCHtomUDlagZP9v5HJmcNZFtSAXCRGt5llQ2aDpz9bXlAQ0BZHDyz6o1zlWoQsIjRrri2TbaBLFYL5Hwn0x4ipjTklP"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas - Adjusted for full width -->
+<main class="pt-24 px-6 md:px-12 pb-12">
+<div class="max-w-7xl mx-auto">
+<!-- Page Header -->
+<header class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-10">
+<div class="space-y-1">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight leading-none">Admin Dashboard</h1>
+<p class="text-on-surface-variant text-lg">Manage clinic performance, user access, and system configurations.</p>
+</div>
+<button class="flex items-center gap-2 bg-surface-container-lowest text-primary font-semibold px-5 py-2.5 rounded-lg shadow-sm border border-outline-variant/10 hover:bg-white transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                    Export CSV
+                </button>
+</header>
+<!-- Analytics Section: Stats -->
+<section class="mb-12">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Clinic Volume Bar Chart -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h3 class="text-sm font-semibold text-primary uppercase tracking-wider mb-1">Clinic Volume</h3>
+<p class="text-2xl font-bold font-headline">Appointments per Day</p>
+</div>
+<span class="text-secondary text-sm font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                            +12% vs last week
+                        </span>
+</div>
+<!-- Bar Chart -->
+<div class="flex items-end justify-between h-48 gap-4 px-2">
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/10 rounded-t-lg h-[40%] hover:bg-primary/20 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/10 rounded-t-lg h-[65%] hover:bg-primary/20 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/40 rounded-t-lg h-[95%] hover:bg-primary/60 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/10 rounded-t-lg h-[55%] hover:bg-primary/20 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/10 rounded-t-lg h-[80%] hover:bg-primary/20 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/5 rounded-t-lg h-[20%] hover:bg-primary/10 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Sat</span>
+</div>
+<div class="flex flex-col items-center gap-3 w-full">
+<div class="w-full bg-primary/5 rounded-t-lg h-[15%] hover:bg-primary/10 transition-all"></div>
+<span class="text-xs text-slate-400 font-medium">Sun</span>
+</div>
+</div>
+</div>
+<!-- Appointment Status Pie Chart -->
+<div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
+<h3 class="text-sm font-semibold text-primary uppercase tracking-wider mb-1">Snapshot</h3>
+<p class="text-lg font-bold font-headline mb-6">Today's Appointment Status</p>
+<div class="flex flex-col items-center">
+<div class="w-32 h-32 pie-chart mb-6 relative">
+<div class="absolute inset-0 m-6 bg-white rounded-full flex items-center justify-center">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-tighter">Status</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-4 gap-y-2 w-full">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+<span class="text-[10px] font-medium text-slate-600 uppercase">Requested</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+<span class="text-[10px] font-medium text-slate-600 uppercase">Confirmed</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<span class="text-[10px] font-medium text-slate-600 uppercase">Checked In</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-green-600"></span>
+<span class="text-[10px] font-medium text-slate-600 uppercase">Completed</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+<span class="text-[10px] font-medium text-slate-600 uppercase">Cancelled</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+<span class="text-[10px] font-medium text-slate-600 uppercase">No Show</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- User Management & System Settings -->
+<div class="grid grid-cols-12 gap-8">
+<!-- User Management Table -->
+<div class="col-span-12">
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm">
+<div class="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<h2 class="text-xl font-bold font-headline">Manage Users &amp; Roles</h2>
+<div class="flex flex-col sm:flex-row w-full md:w-auto gap-4">
+<div class="relative flex-grow min-w-[320px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm rounded-full pl-10 pr-4 py-2 placeholder:text-slate-400 transition-all" placeholder="Search users by name, email or ID..." type="text"/>
+</div>
+<div class="flex items-center self-end sm:self-center">
+<span class="px-4 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100">Total: 1,248 Users</span>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-on-surface-variant text-[10px] uppercase tracking-widest font-bold">
+<tr>
+<th class="px-6 py-4">User</th>
+<th class="px-6 py-4">Role</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/5">
+<tr class="hover:bg-blue-50/30 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200"></div>
+<div>
+<p class="text-sm font-semibold">Sarah Jenkins</p>
+<p class="text-xs text-slate-500">sarah.j@clinic.com</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-md uppercase">Admin</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-xs text-on-surface-variant font-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 rounded hover:bg-surface-container transition-colors text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-blue-50/30 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200"></div>
+<div>
+<p class="text-sm font-semibold">Dr. Michael Chen</p>
+<p class="text-xs text-slate-500">m.chen@clinic.com</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-md uppercase">Doctor</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-xs text-on-surface-variant font-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 rounded hover:bg-surface-container transition-colors text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-blue-50/30 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200"></div>
+<div>
+<p class="text-sm font-semibold">Linda Rodriguez</p>
+<p class="text-xs text-slate-500">linda.r@clinic.com</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-[10px] font-bold rounded-md uppercase">Receptionist</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+<span class="text-xs text-on-surface-variant font-medium">Offline</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 rounded hover:bg-surface-container transition-colors text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-blue-50/30 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200"></div>
+<div>
+<p class="text-sm font-semibold">Thomas Wright</p>
+<p class="text-xs text-slate-500">t.wright@gmail.com</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-bold rounded-md uppercase">Patient</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="text-xs text-on-surface-variant font-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 rounded hover:bg-surface-container transition-colors text-slate-400 hover:text-primary">
+<span class="material-symbols-outlined text-lg">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-slate-50 text-center">
+<button class="text-xs font-bold text-primary hover:underline">View All Users</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="max-w-7xl mx-auto px-6 md:px-12 py-8 border-t border-slate-200 mt-12 flex justify-between items-center text-slate-500 text-sm">
+<div>© 2024 Curator Health. All rights reserved.</div>
+<div class="flex gap-6">
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">Logout</a>
+</div>
+</footer>
+</body></html>

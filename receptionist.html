@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clinical Curator - Receptionist Console</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "on-surface": "#191c1e",
+                        "on-tertiary-container": "#8fbeff",
+                        "surface": "#f8f9fb",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "background": "#f8f9fb",
+                        "on-secondary-fixed": "#00201d",
+                        "on-primary-fixed-variant": "#173bab",
+                        "outline": "#757684",
+                        "on-error-container": "#93000a",
+                        "primary": "#00288e",
+                        "on-surface-variant": "#444653",
+                        "primary-fixed": "#dde1ff",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#1e40af",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed": "#89f5e7",
+                        "surface-container-high": "#e7e8ea",
+                        "surface-container-highest": "#e1e2e4",
+                        "tertiary-container": "#004c8b",
+                        "tertiary-fixed": "#d4e3ff",
+                        "on-tertiary-fixed": "#001c39",
+                        "inverse-primary": "#b8c4ff",
+                        "surface-tint": "#3755c3",
+                        "tertiary-fixed-dim": "#a4c9ff",
+                        "secondary": "#006a61",
+                        "on-primary-fixed": "#001453",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#005049",
+                        "on-secondary-container": "#006f66",
+                        "surface-variant": "#e1e2e4",
+                        "surface-bright": "#f8f9fb",
+                        "outline-variant": "#c4c5d5",
+                        "on-tertiary-fixed-variant": "#004883",
+                        "surface-container": "#edeef0",
+                        "on-background": "#191c1e",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#d9dadc",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f6",
+                        "on-primary-container": "#a8b8ff",
+                        "inverse-on-surface": "#f0f1f3",
+                        "tertiary": "#003564",
+                        "secondary-container": "#86f2e4",
+                        "secondary-fixed-dim": "#6bd8cb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0 10px 40px -10px rgba(0, 40, 142, 0.05);
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex justify-between items-center px-6 py-3">
+<div class="flex items-center gap-8">
+<span class="font-headline text-xl font-bold text-blue-900">Clinical Curator</span>
+<div class="hidden md:flex items-center bg-slate-50 rounded-full px-4 py-1.5 gap-2 border-none">
+<span class="material-symbols-outlined text-slate-400 text-lg">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" placeholder="Search patient name or ID..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end mr-2">
+<span class="text-xs font-bold text-blue-900">Reception Desk</span>
+<span class="text-[10px] text-slate-500">Non-Clinical Access Only</span>
+</div>
+<button class="p-2 text-slate-500 hover:bg-blue-50 transition-colors rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden bg-slate-200">
+<img alt="receptionist" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5WhO-34muGyGLFKRcwdl2fuTI0JuWyf2RWxUvCYt0J7zI3IBTilP8I2J0MFsRQVOJn6N509O7ovKNaP9_DKdAcwjRq_y3SprPBwotP0LjKEqrAwFi-ialmAMtbNQzCrTJGznRXloeM89oJdX-luYqoVFOxI3WhmF5-k8C8mEqtCUkkqji4LVdZJV5lzfjWJajKz60QZuBce0jCLJQ2NmViQpvfBwEr_d3_VtRQcPQnSD6jEMPCCvW7AZvmjsfbfMAUIOiTMU2-UHl"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-12 px-8 min-h-screen max-w-7xl mx-auto">
+<header class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Receptionist Console</h1>
+<p class="text-lg text-on-surface-variant/80 font-medium">Schedule Management &amp; Patient Flow</p>
+</div>
+<div class="flex gap-3">
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-3 border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary">event</span>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">Current Date Range</span>
+<span class="text-sm font-semibold text-primary">Oct 24 — Oct 31, 2023</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Search & Global Filters -->
+<section class="mb-6 flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+<div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Doctor</span>
+<select class="border-none bg-transparent text-sm font-semibold focus:ring-0 py-0 cursor-pointer text-slate-700">
+<option>All Physicians</option>
+<option>Dr. Sarah Jenkins</option>
+<option>Dr. Marcus Thorne</option>
+<option>Dr. Elena Rodriguez</option>
+</select>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Appt Status</span>
+<select class="border-none bg-transparent text-sm font-semibold focus:ring-0 py-0 cursor-pointer text-slate-700">
+<option>All Statuses</option>
+<option>Pending Confirmation</option>
+<option>Confirmed</option>
+<option>Checked-In</option>
+<option>No Show</option>
+</select>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date Range</span>
+<input class="border-none bg-transparent text-sm font-semibold focus:ring-0 py-0 cursor-pointer text-slate-700" type="date" value="2023-10-24"/>
+</div>
+<div class="md:ml-auto relative w-full md:w-64">
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-primary/10" placeholder="Patient name or App ID..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-lg">person_search</span>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Main Schedule & Queue Table -->
+<section class="lg:col-span-8 bg-surface-container-lowest rounded-3xl editorial-shadow overflow-hidden border border-white h-fit">
+<div class="p-6 border-b border-surface-container-low bg-white flex justify-between items-center">
+<div>
+<h2 class="text-xl font-bold text-on-surface">Daily Appointments</h2>
+<p class="text-xs text-slate-500 font-medium mt-1">Non-clinical administrative view only</p>
+</div>
+<div class="flex gap-2">
+<span class="text-[10px] font-bold px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100 uppercase tracking-wider">32 Today</span>
+<span class="text-[10px] font-bold px-3 py-1.5 bg-green-50 text-green-700 rounded-full border border-green-100 uppercase tracking-wider">8 Confirmed</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[600px]">
+<thead>
+<tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/50">
+<th class="px-6 py-4">Time / Queue</th>
+<th class="px-6 py-4">Patient Information</th>
+<th class="px-6 py-4">DOCTOR</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Administrative Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Row: Confirm Booking Action -->
+<tr class="group hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-5 align-top">
+<span class="text-sm font-bold text-on-surface">10:45 AM</span>
+<p class="text-[10px] text-orange-600 font-bold mt-1 uppercase">Pending Conf.</p>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm font-semibold text-on-surface">William Parker</p>
+<p class="text-[10px] text-slate-400 font-medium">ID: #PT-7712 • Follow-up</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-100 text-[9px] font-bold flex items-center justify-center text-slate-600 border border-slate-200">MT</div>
+<span class="text-xs font-medium text-slate-600">Dr. M. Thorne</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500 uppercase tracking-wider">Scheduled</span>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-[10px] font-bold text-green-600 hover:bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 transition-all">CONFIRM</button>
+<button class="text-[10px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-all">RESCHEDULE</button>
+</div>
+</td>
+</tr>
+<!-- Row: Active Queue / Checked In -->
+<tr class="group bg-blue-50/20">
+<td class="px-6 py-5 align-top">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">08:30 AM</span>
+<div class="mt-1 flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="text-[10px] text-primary font-bold">In Queue (12m)</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm font-semibold text-on-surface">Michael Vance</p>
+<p class="text-[10px] text-slate-400 font-medium">ID: #PT-4422 • Consultation</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-teal-50 text-[9px] font-bold flex items-center justify-center text-teal-700 border border-teal-100">MT</div>
+<span class="text-xs font-medium text-slate-600">Dr. M. Thorne</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-0.5">
+<span class="px-2.5 py-1 w-fit rounded-full text-[9px] font-bold bg-primary text-white uppercase tracking-wider">Checked-In</span>
+<span class="text-[9px] text-slate-400 font-medium">Checked: 08:28 AM</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex justify-end items-center gap-3">
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-lg">move_item</span></button>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-lg">more_vert</span></button>
+</div>
+</td>
+</tr>
+<!-- Row: Confirmed but not checked in -->
+<tr class="group hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-5 align-top">
+<span class="text-sm font-bold text-on-surface">11:15 AM</span>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm font-semibold text-on-surface">Sarah Lopez</p>
+<p class="text-[10px] text-slate-400 font-medium">ID: #PT-8831 • Lab Review Only</p>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-purple-50 text-[9px] font-bold flex items-center justify-center text-purple-700 border border-purple-100">ER</div>
+<span class="text-xs font-medium text-slate-600">Dr. E. Rodriguez</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2.5 py-1 rounded-full text-[9px] font-bold bg-green-100 text-green-700 uppercase tracking-wider border border-green-200">Confirmed</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-[10px] font-bold text-primary hover:bg-primary/5 px-4 py-2 rounded-lg border-2 border-primary/10">SET CHECK-IN TIME</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-slate-50/50 border-t border-surface-container-low flex justify-between items-center px-8">
+<p class="text-[11px] text-slate-400 font-medium italic">Showing non-medical appointment metadata</p>
+<button class="text-xs font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                        View Full Week <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</section>
+<!-- Side Panels -->
+<aside class="lg:col-span-4 space-y-6">
+<!-- Check-in Action Card -->
+<div class="bg-white rounded-[2rem] p-6 editorial-shadow border border-slate-100">
+<div class="flex items-center gap-3 mb-5">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined text-xl">how_to_reg</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface">Patient Check-in</h3>
+</div>
+<div class="space-y-4">
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter Patient ID for express check-in..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-3.5 text-slate-400 text-lg">search</span>
+</div>
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Profile</span>
+<span class="text-[10px] font-bold text-primary">PT-5562</span>
+</div>
+<p class="font-bold text-on-surface">Julianne Moore</p>
+<p class="text-xs text-slate-500 mb-4">Confirmed: 12:00 PM with Dr. Jenkins</p>
+<button class="w-full bg-primary text-white py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:shadow-lg transition-all">
+<span class="material-symbols-outlined text-sm">alarm_on</span> ARRIVAL AT 10:42 AM
+                            </button>
+</div>
+</div>
+</div>
+<!-- Rescheduling with Audit Trail -->
+<div class="bg-slate-50 rounded-[2rem] p-6 border border-slate-200/50">
+<div class="flex items-center gap-3 mb-4">
+<div class="p-2 bg-blue-100 rounded-lg text-blue-700">
+<span class="material-symbols-outlined text-xl">edit_calendar</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface">Reschedule Tool</h3>
+</div>
+<div class="space-y-4">
+<div class="space-y-3">
+<div>
+<label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5 ml-1">New Appointment Details</label>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-white p-3 rounded-xl border border-slate-200">
+<p class="text-[9px] text-slate-400 font-bold uppercase">Date</p>
+<span class="text-xs font-semibold">Oct 26, 2023</span>
+</div>
+<div class="bg-white p-3 rounded-xl border border-slate-200">
+<p class="text-[9px] text-slate-400 font-bold uppercase">Time</p>
+<span class="text-xs font-semibold">02:30 PM</span>
+</div>
+</div>
+</div>
+<div class="bg-white p-3 rounded-xl border border-slate-200">
+<label class="text-[9px] text-slate-400 font-bold uppercase block mb-1">Reason for Reschedule (Audit Trail)</label>
+<select class="w-full bg-transparent border-none text-xs font-medium focus:ring-0 p-0 cursor-pointer">
+<option>Patient requested change</option>
+<option>Practitioner unavailability</option>
+<option>Scheduling conflict</option>
+<option>Administrative error</option>
+</select>
+</div>
+</div>
+<button class="w-full py-3 text-xs font-bold text-blue-700 border-2 border-blue-200 rounded-xl hover:bg-white transition-all uppercase tracking-wide">
+                            Confirm Relocation
+                        </button>
+<div class="pt-3 border-t border-slate-200">
+<p class="text-[10px] text-slate-400 font-medium italic text-center">Audit trail entry: PT-4422 moved from 10:00AM to 02:30PM (Reason: Patient Request)</p>
+</div>
+</div>
+</div>
+<!-- Doctor Schedule & Availability (Management Section) -->
+<div class="bg-white rounded-[2rem] p-6 editorial-shadow border border-slate-100">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-on-surface uppercase tracking-widest">Doctor Schedules</h3>
+<button class="text-xs font-bold text-primary">Edit Rules</button>
+</div>
+<div class="space-y-3">
+<div class="p-3 bg-slate-50 rounded-xl border-l-4 border-primary">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-bold">Dr. Sarah Jenkins</span>
+<span class="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase">Active</span>
+</div>
+<p class="text-[10px] text-slate-500 font-medium">Mon-Fri • 08:00 AM - 04:00 PM</p>
+<div class="mt-2 flex gap-1">
+<span class="text-[9px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded italic">Exception: Vacation Oct 27</span>
+</div>
+</div>
+<div class="p-3 bg-slate-50 rounded-xl border-l-4 border-teal-500">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-bold">Dr. Marcus Thorne</span>
+<span class="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase">Active</span>
+</div>
+<p class="text-[10px] text-slate-500 font-medium">Tue-Sat • 09:00 AM - 05:30 PM</p>
+</div>
+</div>
+<button class="w-full mt-6 bg-primary text-white py-3 rounded-xl text-xs font-bold hover:shadow-lg transition-all">
+                        Book Appointment
+                    </button>
+</div>
+</aside>
+</div>
+</main>
+</body></html>
