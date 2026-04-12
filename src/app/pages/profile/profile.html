@@ -1,0 +1,126 @@
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-3xl font-headline font-extrabold text-blue-900 mb-8">My Health Profile</h1>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <span class="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+  </div>
+
+  <div *ngIf="!loading && profile">
+
+    <!-- Messages -->
+    <div *ngIf="successMsg"
+         class="mb-6 p-4 rounded-2xl bg-secondary-fixed/30 text-on-secondary-fixed-variant text-sm font-medium flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">check_circle</span>
+      {{ successMsg }}
+    </div>
+    <div *ngIf="errorMsg"
+         class="mb-6 p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">error</span>
+      {{ errorMsg }}
+    </div>
+
+    <!-- Profile Card -->
+    <div class="bg-surface-container-lowest rounded-3xl shadow-sm shadow-blue-900/5 overflow-hidden">
+
+      <!-- Header -->
+      <div class="bg-primary p-8 text-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-[80px] -mr-32 -mt-32"></div>
+        </div>
+        <div class="relative z-10">
+          <div class="w-24 h-24 rounded-full border-4 border-white/30 mx-auto mb-4 bg-white/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-4xl">person</span>
+          </div>
+          <p class="text-white/70 text-sm font-label">Patient ID: #{{ profile.id }}</p>
+        </div>
+      </div>
+
+      <!-- View Mode -->
+      <div *ngIf="!editing" class="p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Date of Birth</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.date_of_birth }}</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Gender</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.gender }}</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Phone</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.phone_number }}</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Blood Type</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.blood_type || '—' }}</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Height</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.height }} cm</p>
+          </div>
+          <div class="bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Weight</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.weight }} kg</p>
+          </div>
+          <div class="md:col-span-2 bg-surface-container-low p-4 rounded-2xl">
+            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Allergies</p>
+            <p class="font-headline font-bold text-blue-900">{{ profile.allergies || 'None reported' }}</p>
+          </div>
+        </div>
+
+        <button (click)="toggleEdit()"
+                class="mt-8 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl py-3 px-8 font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">edit</span>
+          Edit Profile
+        </button>
+      </div>
+
+      <!-- Edit Mode -->
+      <form *ngIf="editing" [formGroup]="form" (ngSubmit)="save()" class="p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Phone</label>
+            <input formControlName="phone_number"
+                   class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary" />
+          </div>
+          <div>
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Blood Type</label>
+            <select formControlName="blood_type"
+                    class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary">
+              <option value="">Select...</option>
+              <option *ngFor="let bt of bloodTypes" [value]="bt">{{ bt }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Height (cm)</label>
+            <input formControlName="height" type="number"
+                   class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary" />
+          </div>
+          <div>
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Weight (kg)</label>
+            <input formControlName="weight" type="number"
+                   class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Allergies</label>
+            <textarea formControlName="allergies" rows="3"
+                      class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary resize-none"></textarea>
+          </div>
+        </div>
+
+         <div class="flex gap-3 mt-6">
+          <button type="submit" [disabled]="saving"
+                  class="bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl py-3 px-8 font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2">
+            <span *ngIf="saving" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button type="button" (click)="toggleEdit()"
+                  class="py-3 px-8 rounded-xl border border-outline text-slate-600 font-headline font-bold text-sm hover:bg-white transition-colors">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,129 @@
+<!-- Top Nav (simple) -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex items-center px-6 py-3">
+  <button (click)="goBack()" class="flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors">
+    <span class="material-symbols-outlined text-sm">arrow_back</span>
+    Back to Dashboard
+  </button>
+  <span class="ml-4 font-headline text-xl font-bold text-blue-900">Clinical Curator</span>
+</nav>
+
+<main class="max-w-3xl mx-auto pt-24 pb-12 px-6">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <span class="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg"
+       class="p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2">
+    <span class="material-symbols-outlined text-sm">error</span>
+    {{ errorMsg }}
+  </div>
+
+  <div *ngIf="!loading && appointment">
+
+    <!-- Appointment Card -->
+    <div class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden mb-8">
+      <div class="bg-primary p-8">
+        <span class="inline-block px-3 py-1 rounded text-[10px] font-bold uppercase bg-white/20 text-white mb-3">
+          {{ appointment.status }}
+        </span>
+        <h1 class="text-2xl font-headline font-extrabold text-white">
+          Appointment #{{ appointment.id }}
+        </h1>
+        <p *ngIf="appointment.doctor_name" class="text-white/70 mt-1">
+          {{ appointment.doctor_name }} — {{ appointment.doctor_specialization }}
+        </p>
+      </div>
+      <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="bg-slate-50 p-4 rounded-2xl">
+          <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Date</p>
+          <p class="font-headline font-bold text-blue-900">
+            {{ formatDate(appointment.start_datetime || appointment.created_at) }}
+          </p>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl">
+          <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Time</p>
+          <p class="font-headline font-bold text-blue-900">
+            <span *ngIf="appointment.start_datetime">
+              {{ formatTime(appointment.start_datetime) }} — {{ formatTime(appointment.end_datetime) }}
+            </span>
+            <span *ngIf="!appointment.start_datetime">—</span>
+          </p>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl">
+          <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Status</p>
+          <span class="px-2 py-0.5 rounded text-xs font-bold" [ngClass]="getStatusBadgeClass(appointment.status)">
+            {{ appointment.status }}
+          </span>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-2xl">
+          <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Booked</p>
+          <p class="font-headline font-bold text-blue-900">{{ formatDate(appointment.created_at) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consultation (only for COMPLETED) -->
+    <div *ngIf="appointment.status === 'COMPLETED'">
+      <h2 class="text-xl font-headline font-extrabold text-blue-900 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">medical_information</span>
+        Consultation Record
+      </h2>
+
+      <div *ngIf="consultationLoading" class="flex justify-center py-8">
+        <span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
+      </div>
+
+      <div *ngIf="!consultationLoading && !consultation"
+           class="bg-white rounded-3xl border border-outline-variant/30 p-8 text-center shadow-sm">
+        <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">description</span>
+        <p class="text-slate-500 text-sm">No consultation record available yet.</p>
+      </div>
+
+      <div *ngIf="consultation" class="space-y-4">
+        <!-- Diagnosis -->
+        <div class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+          <h3 class="font-headline font-bold text-blue-900 mb-2">Diagnosis</h3>
+          <p class="text-slate-700 text-sm leading-relaxed">{{ consultation.diagnosis }}</p>
+        </div>
+
+        <!-- Notes -->
+        <div *ngIf="consultation.notes" class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+          <h3 class="font-headline font-bold text-blue-900 mb-2">Doctor Notes</h3>
+          <p class="text-slate-700 text-sm leading-relaxed">{{ consultation.notes }}</p>
+        </div>
+
+        <!-- Tests -->
+        <div *ngIf="consultation.tests?.length" class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+          <h3 class="font-headline font-bold text-blue-900 mb-3">Requested Tests</h3>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let test of consultation.tests"
+                  class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold">
+              {{ test }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Prescriptions -->
+        <div *ngIf="consultation.prescriptions?.length"
+             class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+          <h3 class="font-headline font-bold text-blue-900 mb-4">Prescriptions</h3>
+          <div class="space-y-3">
+            <div *ngFor="let rx of consultation.prescriptions"
+                 class="bg-slate-50 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-blue-900">{{ rx.drug_name }}</p>
+                <p class="text-xs text-slate-500">{{ rx.dose }}</p>
+              </div>
+              <span class="px-3 py-1 rounded-lg bg-primary-fixed text-on-primary-fixed-variant text-xs font-bold">
+                {{ rx.duration }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
