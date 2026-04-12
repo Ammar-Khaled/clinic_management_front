@@ -1,0 +1,57 @@
+<aside class="h-screen w-64 fixed left-0 top-0 z-40 bg-slate-50 flex flex-col py-6 space-y-2 px-4 hidden lg:flex pt-20">
+
+  <!-- Brand -->
+  <div class="mb-8 px-3">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary">
+        <span class="material-symbols-outlined">clinical_notes</span>
+      </div>
+      <div>
+        <p class="text-blue-900 font-extrabold font-headline">Curator Health</p>
+        <p class="text-xs text-slate-500 font-label">Medical Portal</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav Links -->
+  <div class="space-y-1 flex-grow">
+    <a routerLink="/dashboard" routerLinkActive="bg-blue-100/50 text-blue-800"
+       class="text-slate-600 rounded-lg px-3 py-2 flex items-center gap-3 font-medium text-sm hover:bg-slate-200/50 transition-all duration-200">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Dashboard</span>
+    </a>
+    <a routerLink="/my-appointments" routerLinkActive="bg-blue-100/50 text-blue-800"
+       class="text-slate-600 px-3 py-2 flex items-center gap-3 font-medium text-sm hover:bg-slate-200/50 rounded-lg transition-all duration-200">
+      <span class="material-symbols-outlined">calendar_month</span>
+      <span>Schedule</span>
+    </a>
+    <a routerLink="/doctors" routerLinkActive="bg-blue-100/50 text-blue-800"
+       class="text-slate-600 px-3 py-2 flex items-center gap-3 font-medium text-sm hover:bg-slate-200/50 rounded-lg transition-all duration-200">
+      <span class="material-symbols-outlined">group</span>
+      <span>Doctors</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="bg-blue-100/50 text-blue-800"
+       class="text-slate-600 px-3 py-2 flex items-center gap-3 font-medium text-sm hover:bg-slate-200/50 rounded-lg transition-all duration-200">
+      <span class="material-symbols-outlined">person</span>
+      <span>My Profile</span>
+    </a>
+  </div>
+
+  <!-- Bottom Actions -->
+  <div class="pt-6 border-t border-outline-variant/10 space-y-1">
+    <a routerLink="/doctors"
+       class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl py-3 px-4 font-headline font-bold text-sm shadow-lg shadow-primary/20 mb-4 flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined text-sm">add</span>
+      Book Appointment
+    </a>
+    <a class="text-slate-600 px-3 py-2 flex items-center gap-3 font-medium text-sm hover:bg-slate-200/50 rounded-lg cursor-pointer">
+      <span class="material-symbols-outlined">help</span>
+      <span>Support</span>
+    </a>
+    <a (click)="logout()"
+       class="text-slate-600 px-3 py-2 flex items-center gap-3 font-medium text-sm hover:bg-slate-200/50 rounded-lg cursor-pointer">
+      <span class="material-symbols-outlined">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
