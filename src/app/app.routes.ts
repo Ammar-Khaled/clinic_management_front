@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { authGuard } from './guards/auth.guard';
-import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -49,7 +48,7 @@ export const routes: Routes = [
       import('./components/receptionist-dashboard/receptionist-dashboard').then(
         m => m.ReceptionistDashboardComponent
       ),
-    canActivate: [authGuard, roleGuard(['receptionist'])],
+    canActivate: [authGuard],
   },
   {
     path: 'receptionist/schedules',
@@ -57,7 +56,7 @@ export const routes: Routes = [
       import('./components/receptionist-dashboard/schedules-management').then(
         m => m.SchedulesManagementComponent
       ),
-    canActivate: [authGuard, roleGuard(['receptionist'])],
+    canActivate: [authGuard],
   },
   {
     path: 'receptionist/slots',
@@ -65,7 +64,7 @@ export const routes: Routes = [
       import('./components/receptionist-dashboard/slots-management').then(
         m => m.SlotsManagementComponent
       ),
-    canActivate: [authGuard, roleGuard(['receptionist'])],
+    canActivate: [authGuard],
   },
   { path: 'receptionist', redirectTo: 'receptionist/dashboard', pathMatch: 'full' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
