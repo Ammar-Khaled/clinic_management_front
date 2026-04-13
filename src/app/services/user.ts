@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { User } from '../models/user.model';
+import { User, PaginatedResponse } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -10,13 +10,15 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(filters?: { role?: string; is_active?: boolean; search?: string }): Observable<User[]> {
+  getUsers(filters?: { role?: string; is_active?: boolean; search?: string; page_size?: number; page?: number }): Observable<PaginatedResponse<User> | User[]> {
     let params = new HttpParams();
     if (filters?.role) params = params.set('role', filters.role);
     if (filters?.is_active !== undefined) params = params.set('is_active', String(filters.is_active));
     if (filters?.search) params = params.set('search', filters.search);
+    if (filters?.page_size) params = params.set('page_size', String(filters.page_size));
+    if (filters?.page) params = params.set('page', String(filters.page));
 
-    return this.http.get<User[]>(`${this.api}/users`, { params });
+    return this.http.get<PaginatedResponse<User> | User[]>(`${this.api}/users`, { params });
   }
 
   createUser(data: User): Observable<User> {

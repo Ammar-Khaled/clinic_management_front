@@ -83,7 +83,18 @@ export class AppointmentService {
   }
 
   getAppointmentsAnalytics(): Observable<any> {
-    return this.http.get(`${this.api}/appointments`);
+    return this.http.get(`${this.api}/appointments/analytics`);
+  }
+
+  getTodayStatusAnalytics(): Observable<any> {
+    return this.http.get(`${this.api}/appointments/analytics/today-status`);
+  }
+
+  exportAnalytics(): Observable<any> {
+    return this.http.get(`${this.api}/appointments/analytics/export`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
   }
 
   // --- Status Updates ---
