@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -47,7 +47,8 @@ export class DashboardComponent implements OnInit {
     private patientService: PatientService,
     private doctorService: DoctorService,
     private appointmentService: AppointmentService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -64,9 +65,11 @@ export class DashboardComponent implements OnInit {
       next: (data: PatientProfile) => {
         this.profile = data;
         this.profileLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.profileLoading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -79,8 +82,11 @@ export class DashboardComponent implements OnInit {
         this.doctors = res.doctors;
         this.specializations = this.doctorService.getSpecializations(res.doctors);
         this.filteredDoctors = [...this.doctors];
+        this.cdr.detectChanges();
       },
-      error: () => {},
+      error: () => {
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -127,16 +133,20 @@ export class DashboardComponent implements OnInit {
   loadSlots(): void {
     if (!this.selectedDoctorId || !this.bookingDate) return;
     this.slotsLoading = true;
+    this.cdr.detectChanges();
+
     this.doctorService
       .getDoctorSlots(this.selectedDoctorId, this.bookingDate, this.bookingDate)
       .subscribe({
         next: (res: any) => {
           this.availableSlots = res.slots.filter((s: Slot) => !s.is_booked);
           this.slotsLoading = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.availableSlots = [];
           this.slotsLoading = false;
+          this.cdr.detectChanges();
         },
       });
   }
@@ -152,30 +162,38 @@ export class DashboardComponent implements OnInit {
     this.bookingInProgress = true;
     this.bookingError = '';
     this.bookingSuccess = '';
+    this.cdr.detectChanges();
 
     const slot = this.selectedSlot;
-    const doctor = this.doctors.find((d: Doctor) => d.id === this.selectedDoctorId);
+    const doctor = this.doctors.find(
+      (d: Doctor) => d.id === this.selectedDoctorId
+    );
 
     this.appointmentService.bookAppointment(slot.id).subscribe({
       next: (apt: any) => {
+        // Cache the booking info for enrichment later
         this.appointmentService.cacheBooking(apt.id, {
-          doctor_name: doctor ? `Doctor #${doctor.id}` : '',
-          doctor_specialization: doctor?.specialization || '',
-          start_datetime: slot.start_datetime,
-          end_datetime: slot.end_datetime,
-          session_duration: 0,
-        });
-
+  doctor_id: doctor?.id || 0,
+  doctor_name: doctor ? `Doctor #${doctor.id}` : '',
+  doctor_specialization: doctor?.specialization || '',
+  start_datetime: slot.start_datetime,
+  end_datetime: slot.end_datetime,
+  session_duration: 0,
+});
         this.bookingSuccess = 'Appointment booked successfully!';
         this.bookingInProgress = false;
         this.selectedSlot = null;
+        this.cdr.detectChanges();
 
+        // Refresh slots and appointments
         this.loadSlots();
         this.loadAppointments();
       },
       error: (err: any) => {
         this.bookingInProgress = false;
-        this.bookingError = err.error?.error || 'Failed to book appointment.';
+        this.bookingError =
+          err.error?.error || 'Failed to book appointment.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -184,6 +202,8 @@ export class DashboardComponent implements OnInit {
 
   loadAppointments(): void {
     this.appointmentsLoading = true;
+    this.cdr.detectChanges();
+
     this.appointmentService.getMyAppointments().subscribe({
       next: (data: Appointment[]) => {
         this.appointments = data;
@@ -194,9 +214,11 @@ export class DashboardComponent implements OnInit {
           ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status)
         );
         this.appointmentsLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.appointmentsLoading = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -218,8 +240,10 @@ export class DashboardComponent implements OnInit {
 
   getStatusBadgeClass(status: string): string {
     const map: Record<string, string> = {
-      SCHEDULED: 'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
-      CONFIRMED: 'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
+      SCHEDULED:
+        'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
+      CONFIRMED:
+        'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
       CHECKED_IN: 'bg-green-100 text-green-700',
       COMPLETED: 'bg-blue-100 text-blue-700',
       CANCELLED: 'bg-slate-200 text-slate-600',
@@ -242,7 +266,8 @@ export class DashboardComponent implements OnInit {
 
   getStatusIconBg(status: string): string {
     const map: Record<string, string> = {
-      SCHEDULED: 'bg-surface-container-highest text-slate-400',
+      SCHEDULED:
+        'bg-surface-container-highest text-slate-400',
       CONFIRMED: 'bg-secondary-container/20 text-secondary',
       CHECKED_IN: 'bg-green-100 text-green-700',
       COMPLETED: 'bg-blue-100 text-blue-700',

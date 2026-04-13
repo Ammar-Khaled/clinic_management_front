@@ -13,7 +13,7 @@
     <!-- Card -->
     <div class="bg-surface-container-lowest rounded-3xl shadow-sm shadow-blue-900/5 p-8">
 
-      <!-- Error -->
+      <!-- General Error -->
       <div *ngIf="errorMsg"
            class="mb-6 p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2">
         <span class="material-symbols-outlined text-sm">error</span>
@@ -29,35 +29,84 @@
             Account Information
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- Username -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Username *</label>
               <input formControlName="username"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="(form.get('username')?.touched && form.get('username')?.invalid) || fieldErrors['username']
+                       ? 'border-error' : 'border-transparent'"
                      placeholder="johndoe" />
+              <p *ngIf="form.get('username')?.touched && form.get('username')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Username is required</p>
+              <p *ngIf="fieldErrors['username']"
+                 class="text-error text-[11px] mt-1">{{ fieldErrors['username'] }}</p>
             </div>
+
+            <!-- Email -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Email *</label>
               <input formControlName="email" type="email"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="(form.get('email')?.touched && form.get('email')?.invalid) || fieldErrors['email']
+                       ? 'border-error' : 'border-transparent'"
                      placeholder="john@example.com" />
+              <p *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Email is required</p>
+              <p *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')"
+                 class="text-error text-[11px] mt-1">Enter a valid email</p>
+              <p *ngIf="fieldErrors['email']"
+                 class="text-error text-[11px] mt-1">{{ fieldErrors['email'] }}</p>
             </div>
+
+            <!-- First Name -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">First Name *</label>
               <input formControlName="first_name"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="form.get('first_name')?.touched && form.get('first_name')?.invalid
+                       ? 'border-error' : 'border-transparent'"
                      placeholder="John" />
+              <p *ngIf="form.get('first_name')?.touched && form.get('first_name')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">First name is required</p>
             </div>
+
+            <!-- Last Name -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Last Name *</label>
               <input formControlName="last_name"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="form.get('last_name')?.touched && form.get('last_name')?.invalid
+                       ? 'border-error' : 'border-transparent'"
                      placeholder="Doe" />
+              <p *ngIf="form.get('last_name')?.touched && form.get('last_name')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Last name is required</p>
             </div>
+
+            <!-- Password -->
             <div class="md:col-span-2">
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Password *</label>
-              <input formControlName="password" type="password"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
-                     placeholder="Min 8 characters" />
+              <div class="relative">
+                <input formControlName="password"
+                       [type]="showPassword ? 'text' : 'password'"
+                       class="w-full px-4 py-3 pr-12 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                       [ngClass]="(form.get('password')?.touched && form.get('password')?.invalid) || fieldErrors['password']
+                         ? 'border-error' : 'border-transparent'"
+                       placeholder="Min 8 characters" />
+                <button type="button" (click)="togglePassword()"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <span class="material-symbols-outlined text-lg">
+                    {{ showPassword ? 'visibility_off' : 'visibility' }}
+                  </span>
+                </button>
+              </div>
+              <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Password is required</p>
+              <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('minlength')"
+                 class="text-error text-[11px] mt-1">Password must be at least 8 characters</p>
+              <p *ngIf="fieldErrors['password']"
+                 class="text-error text-[11px] mt-1">{{ fieldErrors['password'] }}</p>
             </div>
           </div>
         </div>
@@ -72,50 +121,90 @@
             Medical Profile
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- DOB -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Date of Birth *</label>
               <input formControlName="date_of_birth" type="date"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary" />
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="form.get('date_of_birth')?.touched && form.get('date_of_birth')?.invalid
+                       ? 'border-error' : 'border-transparent'" />
+              <p *ngIf="form.get('date_of_birth')?.touched && form.get('date_of_birth')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Date of birth is required</p>
             </div>
+
+            <!-- Gender -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Gender *</label>
               <select formControlName="gender"
-                      class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary">
+                      class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                      [ngClass]="form.get('gender')?.touched && form.get('gender')?.invalid
+                        ? 'border-error' : 'border-transparent'">
                 <option value="">Select...</option>
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
               </select>
+              <p *ngIf="form.get('gender')?.touched && form.get('gender')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Gender is required</p>
             </div>
+
+            <!-- Phone -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Phone *</label>
               <input formControlName="phone_number"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
-                     placeholder="+20 1xx xxx xxxx" />
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="(form.get('phone_number')?.touched && form.get('phone_number')?.invalid) || fieldErrors['phone_number']
+                       ? 'border-error' : 'border-transparent'"
+                     placeholder="01012345678" />
+              <p *ngIf="form.get('phone_number')?.touched && form.get('phone_number')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Phone number is required</p>
+              <p *ngIf="fieldErrors['phone_number']"
+                 class="text-error text-[11px] mt-1">{{ fieldErrors['phone_number'] }}</p>
             </div>
+
+            <!-- Height -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Height (cm) *</label>
               <input formControlName="height" type="number"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="form.get('height')?.touched && form.get('height')?.invalid
+                       ? 'border-error' : 'border-transparent'"
                      placeholder="170" />
+              <p *ngIf="form.get('height')?.touched && form.get('height')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Height is required</p>
+              <p *ngIf="form.get('height')?.touched && form.get('height')?.hasError('min')"
+                 class="text-error text-[11px] mt-1">Must be greater than 0</p>
             </div>
+
+            <!-- Weight -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Weight (kg) *</label>
               <input formControlName="weight" type="number"
-                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary"
+                     class="w-full px-4 py-3 rounded-xl bg-surface-container-low border text-sm focus:ring-2 focus:ring-primary transition-colors"
+                     [ngClass]="form.get('weight')?.touched && form.get('weight')?.invalid
+                       ? 'border-error' : 'border-transparent'"
                      placeholder="70" />
+              <p *ngIf="form.get('weight')?.touched && form.get('weight')?.hasError('required')"
+                 class="text-error text-[11px] mt-1">Weight is required</p>
+              <p *ngIf="form.get('weight')?.touched && form.get('weight')?.hasError('min')"
+                 class="text-error text-[11px] mt-1">Must be greater than 0</p>
             </div>
+
+            <!-- Blood Type -->
             <div>
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Blood Type</label>
               <select formControlName="blood_type"
-                      class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary">
+                      class="w-full px-4 py-3 rounded-xl bg-surface-container-low border border-transparent text-sm focus:ring-2 focus:ring-primary">
                 <option value="">Select...</option>
                 <option *ngFor="let bt of bloodTypes" [value]="bt">{{ bt }}</option>
               </select>
             </div>
+
+            <!-- Allergies -->
             <div class="md:col-span-3">
               <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">Allergies</label>
               <textarea formControlName="allergies" rows="2"
-                        class="w-full px-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm focus:ring-2 focus:ring-primary resize-none"
+                        class="w-full px-4 py-3 rounded-xl bg-surface-container-low border border-transparent text-sm focus:ring-2 focus:ring-primary resize-none"
                         placeholder="List any known allergies..."></textarea>
             </div>
           </div>
@@ -123,7 +212,7 @@
 
         <!-- Submit -->
         <button type="submit"
-                [disabled]="form.invalid || loading"
+                [disabled]="loading"
                 class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl py-3.5 font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
           <span *ngIf="loading" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
           {{ loading ? 'Creating Account...' : 'Create Account' }}

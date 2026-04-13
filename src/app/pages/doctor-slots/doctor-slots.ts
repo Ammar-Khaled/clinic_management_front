@@ -94,6 +94,7 @@ export class DoctorSlotsComponent implements OnInit {
       next: (apt) => {
         // Cache the booking info for dashboard display
         this.appointmentService.cacheBooking(apt.id, {
+          doctor_id: Number(this.route.snapshot.paramMap.get('id')) || 0,
           doctor_name: `Doctor #${this.doctorId}`,
           doctor_specialization: '',
           start_datetime: slot.start_datetime,

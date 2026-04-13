@@ -1,16 +1,14 @@
 import { Slot } from './doctor.model';
 
-// What the API actually returns (flat)
 export interface AppointmentRaw {
   id: number;
   status: string;
   check_in_time: string | null;
   created_at: string;
-  slot: number;       // just the slot ID
-  patient: number;    // just the patient ID
+  slot: number;
+  patient: number;
 }
 
-// Enriched version for display (built on the frontend)
 export interface Appointment {
   id: number;
   status: string;
@@ -18,7 +16,7 @@ export interface Appointment {
   created_at: string;
   slot_id: number;
   patient_id: number;
-  // enriched fields (may be empty if not resolved)
+  doctor_id: number;
   doctor_name: string;
   doctor_specialization: string;
   start_datetime: string;
@@ -43,9 +41,9 @@ export interface Consultation {
   prescriptions: Prescription[];
 }
 
-// Used to cache booking context
 export interface BookingCache {
   [appointmentId: number]: {
+    doctor_id: number;
     doctor_name: string;
     doctor_specialization: string;
     start_datetime: string;
