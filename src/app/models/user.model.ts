@@ -49,6 +49,7 @@ export interface User {
   id?: string | number;
   username?: string;
   email?: string;
+  password?: string;
   role?: string;
   first_name?: string;
   last_name?: string;
@@ -71,4 +72,11 @@ export interface AppointmentsAnalytics {
   growthPercentage?: number;
   volume?: DailyAppointmentStat[];
   statuses?: AppointmentStatusStat[];
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
