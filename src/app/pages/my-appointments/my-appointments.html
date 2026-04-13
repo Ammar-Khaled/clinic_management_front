@@ -1,101 +1,358 @@
-<div class="max-w-4xl mx-auto">
+<div class="max-w-screen-xl mx-auto">
 
-  <!-- Header -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-    <div>
-      <h1 class="text-3xl font-headline font-extrabold text-blue-900">My Appointments</h1>
-      <p class="text-slate-500 text-sm mt-1">Track and manage all your consultations</p>
+  <!-- Back Button -->
+  <button (click)="goBack()"
+          class="group inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-primary mb-8 transition-all duration-200">
+    <span class="w-9 h-9 rounded-xl bg-surface-container-low group-hover:bg-primary-fixed flex items-center justify-center transition-all duration-200 group-hover:shadow-md">
+      <span class="material-symbols-outlined text-lg text-slate-500 group-hover:text-primary transition-colors">arrow_back</span>
+    </span>
+    <span class="group-hover:translate-x-0.5 transition-transform">Back</span>
+  </button>
+
+  <!-- Header Section -->
+  <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="max-w-2xl">
+      <h1 class="text-4xl md:text-5xl font-extrabold font-headline tracking-tighter text-primary mb-4">
+        Manage Your Consultations
+      </h1>
+      <p class="text-lg text-on-surface-variant leading-relaxed">
+        View and manage your upcoming visits with healthcare professionals, or review summaries from past clinical encounters.
+      </p>
     </div>
-    <a routerLink="/doctors"
-       class="inline-flex items-center gap-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl py-2.5 px-5 font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all">
-      <span class="material-symbols-outlined text-sm">add</span>
-      New Booking
-    </a>
-  </div>
+    <div class="flex gap-3 flex-shrink-0">
+  <button (click)="goBack()"
+          class="px-6 py-3 bg-primary-fixed text-on-primary-fixed rounded-xl font-semibold text-sm hover:shadow-md transition-all flex items-center gap-2">
+    <span class="material-symbols-outlined text-lg">calendar_add_on</span>
+    New Booking
+  </button>
+</div>
+  </header>
 
   <!-- Filter Tabs -->
-  <div class="flex gap-2 mb-8 overflow-x-auto pb-2">
+  <div class="flex gap-2 mb-10 overflow-x-auto pb-2">
     <button *ngFor="let f of filters"
             (click)="setFilter(f.value)"
-            class="px-4 py-2 rounded-xl text-xs font-bold font-label whitespace-nowrap transition-all duration-200"
+            class="px-5 py-2.5 rounded-xl text-xs font-bold font-label whitespace-nowrap transition-all duration-200 tracking-wide uppercase"
             [ngClass]="activeFilter === f.value
-              ? 'bg-primary text-on-primary shadow-md'
-              : 'bg-surface-container-lowest text-slate-500 hover:bg-surface-container-high'">
+              ? 'bg-primary text-on-primary shadow-lg shadow-primary/20'
+              : 'bg-surface-container-lowest text-slate-500 hover:bg-surface-container-high border border-outline-variant/20'">
       {{ f.label }}
+      <span *ngIf="f.value !== 'ALL' && getCountForFilter(f.value) > 0"
+            class="ml-1.5 px-1.5 py-0.5 rounded-full text-[9px]"
+            [ngClass]="activeFilter === f.value ? 'bg-white/20' : 'bg-slate-200/60'">
+        {{ getCountForFilter(f.value) }}
+      </span>
     </button>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="flex justify-center py-20">
-    <span class="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+  <div *ngIf="loading" class="flex flex-col items-center justify-center py-24 gap-4">
+    <div class="w-16 h-16 rounded-2xl bg-primary-fixed/30 flex items-center justify-center">
+      <span class="material-symbols-outlined animate-spin text-primary text-3xl">progress_activity</span>
+    </div>
+    <p class="text-sm text-slate-400 font-medium">Loading your appointments...</p>
   </div>
 
   <!-- Error -->
   <div *ngIf="errorMsg"
-       class="p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2 mb-6">
-    <span class="material-symbols-outlined text-sm">error</span>
-    {{ errorMsg }}
+       class="p-5 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-3 mb-8 shadow-sm">
+    <div class="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-error">error</span>
+    </div>
+    <div>
+      <p class="font-bold text-sm">Something went wrong</p>
+      <p class="text-xs opacity-80 mt-0.5">{{ errorMsg }}</p>
+    </div>
+    <button (click)="loadAppointments()" class="ml-auto px-4 py-2 bg-white/30 rounded-lg text-xs font-bold hover:bg-white/50 transition-all">
+      Retry
+    </button>
   </div>
 
-  <!-- Empty -->
+  <!-- Empty State -->
   <div *ngIf="!loading && filteredAppointments.length === 0 && !errorMsg"
-       class="bg-surface-container-lowest rounded-3xl p-12 text-center shadow-sm">
-    <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">event_busy</span>
-    <p class="text-slate-500 font-medium text-lg">
+       class="bg-surface-container-lowest rounded-[2rem] p-16 text-center shadow-sm border border-outline-variant/10">
+    <div class="w-20 h-20 rounded-3xl bg-surface-container-low flex items-center justify-center mx-auto mb-6">
+      <span class="material-symbols-outlined text-5xl text-slate-300" style="font-variation-settings: 'FILL' 1;">event_busy</span>
+    </div>
+    <h3 class="text-xl font-bold font-headline text-on-surface mb-2">
       {{ activeFilter === 'ALL' ? 'No appointments yet' : 'No ' + activeFilter.toLowerCase() + ' appointments' }}
+    </h3>
+    <p class="text-sm text-slate-400 max-w-md mx-auto mb-6">
+      {{ activeFilter === 'ALL' ? 'Start by booking a consultation with one of our healthcare professionals.' : 'Try selecting a different filter or book a new appointment.' }}
     </p>
-    <a routerLink="/doctors" class="text-primary font-semibold text-sm hover:underline mt-2 inline-block">
-      Book your first appointment →
+    <a routerLink="/doctors"
+       class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl transition-all">
+      <span class="material-symbols-outlined text-lg">add</span>
+      Book your first appointment
     </a>
   </div>
 
-  <!-- Appointment List -->
-  <div *ngIf="!loading" class="space-y-4">
-    <a *ngFor="let apt of filteredAppointments"
-       [routerLink]="['/appointments', apt.id]"
-       class="group bg-surface-container-lowest p-6 rounded-3xl shadow-sm shadow-blue-900/5 hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-5 cursor-pointer block">
+  <!-- Upcoming Appointments Section -->
+  <section *ngIf="!loading && getUpcomingAppointments().length > 0" class="mb-16">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-xl font-bold font-headline tracking-tight text-on-surface flex items-center gap-2">
+        <span class="w-2 h-6 bg-primary rounded-full"></span>
+        Upcoming Appointments
+      </h2>
+      <span class="px-3 py-1 bg-primary/5 text-primary text-xs font-bold rounded-full">
+        {{ getUpcomingAppointments().length }} Scheduled
+      </span>
+    </div>
 
-      <!-- Left: Icon + Info -->
-      <div class="flex items-center gap-5">
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center"
-             [ngClass]="getStatusColor(apt.status)">
-          <span class="material-symbols-outlined text-xl"
-                style="font-variation-settings: 'FILL' 1;">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Featured Appointment (first upcoming) -->
+      <a *ngIf="getUpcomingAppointments()[0] as apt"
+         [routerLink]="['/appointments', apt.id]"
+         class="lg:col-span-2 bg-surface-container-lowest rounded-3xl p-8 shadow-sm shadow-blue-900/5 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden group cursor-pointer hover:shadow-md transition-all">
+        <div class="absolute top-0 right-0 p-6">
+          <span class="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full"
+                [ngClass]="getStatusBadgeColor(apt.status)">
+            {{ apt.status }}
+          </span>
+        </div>
+        <div class="w-full md:w-48 h-48 rounded-2xl overflow-hidden shadow-inner flex-shrink-0 bg-gradient-to-br from-primary-fixed to-primary-fixed-dim flex items-center justify-center">
+          <span class="material-symbols-outlined text-7xl text-primary/30" style="font-variation-settings: 'FILL' 1;">
             {{ getStatusIcon(apt.status) }}
           </span>
         </div>
-        <div>
-          <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1.5"
-                [ngClass]="getStatusColor(apt.status)">
-            {{ apt.status }}
-          </span>
-          <h4 class="font-headline font-bold text-blue-900 group-hover:text-primary transition-colors">
+        <div class="flex-grow">
+          <p class="text-secondary font-semibold text-sm mb-1">{{ apt.doctor_specialization || 'General Consultation' }}</p>
+          <h3 class="text-2xl font-bold font-headline text-on-surface mb-4 group-hover:text-primary transition-colors">
             {{ apt.doctor_name || 'Appointment #' + apt.id }}
-          </h4>
-          <p *ngIf="apt.doctor_specialization" class="text-sm text-slate-500">
-            {{ apt.doctor_specialization }}
-            <span *ngIf="apt.session_duration"> • {{ apt.session_duration }} mins</span>
-          </p>
+          </h3>
+          <div class="grid grid-cols-2 gap-6 mb-8">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">calendar_today</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Date</p>
+                <p class="text-sm font-semibold">{{ formatDate(apt.start_datetime || apt.created_at) }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">schedule</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Time</p>
+                <p class="text-sm font-semibold">{{ apt.start_datetime ? formatTime(apt.start_datetime) : '—' }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-primary font-bold group-hover:gap-3 transition-all">
+            View Details
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Secondary Upcoming Cards -->
+      <div class="flex flex-col gap-6">
+        <a *ngFor="let apt of getUpcomingAppointments().slice(1, 3)"
+           [routerLink]="['/appointments', apt.id]"
+           class="bg-surface-container-low rounded-3xl p-6 flex flex-col justify-between border border-white/50 cursor-pointer group hover:shadow-md transition-all flex-1">
+          <div>
+            <div class="flex justify-between items-start mb-5">
+              <div class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">
+                  {{ getStatusIcon(apt.status) }}
+                </span>
+              </div>
+              <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full"
+                    [ngClass]="getStatusBadgeColor(apt.status)">
+                {{ apt.status }}
+              </span>
+            </div>
+            <h3 class="text-lg font-bold font-headline text-on-surface group-hover:text-primary transition-colors">
+              {{ apt.doctor_name || 'Appointment #' + apt.id }}
+            </h3>
+            <p class="text-sm text-on-surface-variant mb-5">{{ apt.doctor_specialization || 'Consultation' }}</p>
+            <div class="space-y-3 mb-4">
+              <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                <span class="text-xs text-slate-500">Date</span>
+                <span class="text-sm font-semibold">{{ formatDate(apt.start_datetime || apt.created_at) }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                <span class="text-xs text-slate-500">Time</span>
+                <span class="text-sm font-semibold">{{ apt.start_datetime ? formatTime(apt.start_datetime) : '—' }}</span>
+              </div>
+              <div *ngIf="apt.session_duration" class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+                <span class="text-xs text-slate-500">Duration</span>
+                <span class="text-sm font-semibold">{{ apt.session_duration }} mins</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-primary font-bold text-xs group-hover:gap-2 transition-all pt-2">
+            View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </div>
+        </a>
+
+        <!-- Extra upcoming if only 1 secondary card, show placeholder -->
+        <div *ngIf="getUpcomingAppointments().length === 2"
+             class="bg-surface-container-low/50 rounded-3xl p-6 flex flex-col items-center justify-center border border-dashed border-outline-variant/30 flex-1">
+          <span class="material-symbols-outlined text-3xl text-slate-300 mb-2">add_circle</span>
+          <p class="text-xs text-slate-400 font-medium text-center">Book another appointment</p>
+          <a routerLink="/doctors" class="text-primary text-xs font-bold mt-2 hover:underline">Browse Doctors</a>
         </div>
       </div>
+    </div>
 
-      <!-- Middle: Date/Time -->
-      <div class="flex flex-col md:items-end gap-0.5">
-        <p class="font-headline font-bold text-blue-900">
-          {{ formatDate(apt.start_datetime || apt.created_at) }}
-        </p>
-        <p *ngIf="apt.start_datetime" class="text-sm text-slate-500 font-label">
-          {{ formatTime(apt.start_datetime) }}
-        </p>
-        <p *ngIf="!apt.start_datetime" class="text-xs text-slate-400 font-label">
-          Booked: {{ formatDate(apt.created_at) }}
-        </p>
-      </div>
+    <!-- Extra upcoming cards beyond 3 -->
+    <div *ngIf="getUpcomingAppointments().length > 3" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <a *ngFor="let apt of getUpcomingAppointments().slice(3)"
+         [routerLink]="['/appointments', apt.id]"
+         class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm shadow-blue-900/5 hover:shadow-md transition-all cursor-pointer group border border-outline-variant/10">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-11 h-11 rounded-2xl flex items-center justify-center"
+               [ngClass]="getStatusColor(apt.status)">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">
+              {{ getStatusIcon(apt.status) }}
+            </span>
+          </div>
+          <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full"
+                [ngClass]="getStatusBadgeColor(apt.status)">
+            {{ apt.status }}
+          </span>
+        </div>
+        <h4 class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors mb-1">
+          {{ apt.doctor_name || 'Appointment #' + apt.id }}
+        </h4>
+        <p class="text-sm text-slate-500 mb-4">{{ apt.doctor_specialization || 'Consultation' }}</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-base text-slate-400">calendar_today</span>
+            <span class="font-semibold text-sm">{{ formatDate(apt.start_datetime || apt.created_at) }}</span>
+          </div>
+          <span class="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1 transition-all">arrow_forward</span>
+        </div>
+      </a>
+    </div>
+  </section>
 
-      <!-- Right: Arrow -->
-      <span class="material-symbols-outlined text-slate-400 group-hover:text-primary group-hover:translate-x-1 transition-all hidden md:block">
-        arrow_forward
+  <!-- Past Appointments Section (Table View) -->
+  <section *ngIf="!loading && getPastAppointments().length > 0">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-xl font-bold font-headline tracking-tight text-on-surface flex items-center gap-2">
+        <span class="w-2 h-6 bg-secondary rounded-full"></span>
+        Appointment History
+      </h2>
+      <span class="px-3 py-1 bg-secondary/5 text-secondary text-xs font-bold rounded-full">
+        {{ getPastAppointments().length }} Past
       </span>
-    </a>
-  </div>
+    </div>
+
+    <div class="bg-surface-container-low rounded-[2rem] overflow-hidden p-2">
+      <div class="bg-surface-container-lowest rounded-[1.5rem] shadow-sm overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-surface-container-low">
+              <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Date & Time</th>
+              <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Practitioner</th>
+              <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden md:table-cell">Specialization</th>
+              <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+              <th class="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-low">
+            <tr *ngFor="let apt of getPastAppointments()"
+                class="group hover:bg-surface-container-low/30 transition-colors cursor-pointer"
+                [routerLink]="['/appointments', apt.id]">
+              <td class="px-8 py-6">
+                <p class="font-bold text-sm">{{ formatDate(apt.start_datetime || apt.created_at) }}</p>
+                <p class="text-xs text-slate-500">{{ apt.start_datetime ? formatTime(apt.start_datetime) : 'N/A' }}</p>
+              </td>
+              <td class="px-8 py-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary text-[10px] font-bold">
+                    {{ getInitials(apt.doctor_name) }}
+                  </div>
+                  <div>
+                    <p class="font-bold text-sm group-hover:text-primary transition-colors">{{ apt.doctor_name || 'Doctor' }}</p>
+                    <p class="text-[10px] text-slate-500 md:hidden">{{ apt.doctor_specialization || '' }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-8 py-6 hidden md:table-cell">
+                <span class="px-3 py-1 bg-surface-container-high rounded-lg text-xs font-medium text-on-surface-variant">
+                  {{ apt.doctor_specialization || 'General' }}
+                </span>
+              </td>
+              <td class="px-8 py-6">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full"
+                        [ngClass]="getStatusDotColor(apt.status)"></span>
+                  <span class="text-xs font-bold"
+                        [ngClass]="getStatusTextColor(apt.status)">
+                    {{ apt.status }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-8 py-6 text-right">
+                <span class="px-4 py-2 bg-surface-container-high text-on-surface-variant text-xs font-bold rounded-lg group-hover:bg-primary group-hover:text-white transition-all inline-block">
+                  View Details
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- All appointments as cards when filter is active (not ALL) -->
+  <section *ngIf="!loading && activeFilter !== 'ALL' && filteredAppointments.length > 0">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-xl font-bold font-headline tracking-tight text-on-surface flex items-center gap-2">
+        <span class="w-2 h-6 bg-primary rounded-full"></span>
+        {{ getActiveFilterLabel() }} Appointments
+      </h2>
+      <span class="px-3 py-1 bg-primary/5 text-primary text-xs font-bold rounded-full">
+        {{ filteredAppointments.length }} Found
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <a *ngFor="let apt of filteredAppointments"
+         [routerLink]="['/appointments', apt.id]"
+         class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm shadow-blue-900/5 hover:shadow-md transition-all cursor-pointer group border border-outline-variant/10">
+        <div class="flex justify-between items-start mb-5">
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center"
+               [ngClass]="getStatusColor(apt.status)">
+            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">
+              {{ getStatusIcon(apt.status) }}
+            </span>
+          </div>
+          <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full"
+                [ngClass]="getStatusBadgeColor(apt.status)">
+            {{ apt.status }}
+          </span>
+        </div>
+        <h4 class="font-headline font-bold text-lg text-on-surface group-hover:text-primary transition-colors mb-1">
+          {{ apt.doctor_name || 'Appointment #' + apt.id }}
+        </h4>
+        <p *ngIf="apt.doctor_specialization" class="text-sm text-on-surface-variant mb-5">
+          {{ apt.doctor_specialization }}
+        </p>
+        <div class="space-y-3 mb-5">
+          <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+            <span class="text-xs text-slate-500">Date</span>
+            <span class="text-sm font-semibold">{{ formatDate(apt.start_datetime || apt.created_at) }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+            <span class="text-xs text-slate-500">Time</span>
+            <span class="text-sm font-semibold">{{ apt.start_datetime ? formatTime(apt.start_datetime) : '—' }}</span>
+          </div>
+          <div *ngIf="apt.session_duration" class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+            <span class="text-xs text-slate-500">Duration</span>
+            <span class="text-sm font-semibold">{{ apt.session_duration }} mins</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1 text-primary font-bold text-sm group-hover:gap-2 transition-all">
+          View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
 </div>

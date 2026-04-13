@@ -21,9 +21,11 @@ export class DashboardComponent implements OnInit {
   // Profile
   profile: PatientProfile | null = null;
   profileLoading = true;
+  patientName = '';
 
   // Doctors & Booking
   doctors: Doctor[] = [];
+  doctorMap: Map<number, Doctor> = new Map();
   specializations: string[] = [];
   selectedSpec = '';
   filteredDoctors: Doctor[] = [];
@@ -41,6 +43,10 @@ export class DashboardComponent implements OnInit {
   upcomingAppointments: Appointment[] = [];
   pastAppointments: Appointment[] = [];
   appointmentsLoading = true;
+
+  // Track if both doctors and appointments loaded (for resolution)
+  private doctorsLoaded = false;
+  private appointmentsLoaded = false;
 
   constructor(
     private auth: AuthService,
@@ -64,10 +70,14 @@ export class DashboardComponent implements OnInit {
     this.patientService.getProfile().subscribe({
       next: (data: PatientProfile) => {
         this.profile = data;
+        this.patientName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Patient';
+        if (data.first_name) localStorage.setItem('patient_first_name', data.first_name);
+        if (data.last_name) localStorage.setItem('patient_last_name', data.last_name);
         this.profileLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
+        this.patientName = localStorage.getItem('patient_first_name') || 'Patient';
         this.profileLoading = false;
         this.cdr.detectChanges();
       },
@@ -82,7 +92,14 @@ export class DashboardComponent implements OnInit {
         this.doctors = res.doctors;
         this.specializations = this.doctorService.getSpecializations(res.doctors);
         this.filteredDoctors = [...this.doctors];
+        this.doctorMap = new Map(
+          this.doctors.map((d: Doctor) => [d.id, d])
+        );
+        this.doctorsLoaded = true;
         this.cdr.detectChanges();
+
+        // Try resolving uncached appointments now that doctors are loaded
+        this.tryResolveUncached();
       },
       error: () => {
         this.cdr.detectChanges();
@@ -168,24 +185,26 @@ export class DashboardComponent implements OnInit {
     const doctor = this.doctors.find(
       (d: Doctor) => d.id === this.selectedDoctorId
     );
+    const doctorName = doctor
+      ? `Dr. ${doctor.first_name} ${doctor.last_name}`.trim()
+      : '';
 
     this.appointmentService.bookAppointment(slot.id).subscribe({
       next: (apt: any) => {
-        // Cache the booking info for enrichment later
         this.appointmentService.cacheBooking(apt.id, {
-  doctor_id: doctor?.id || 0,
-  doctor_name: doctor ? `Doctor #${doctor.id}` : '',
-  doctor_specialization: doctor?.specialization || '',
-  start_datetime: slot.start_datetime,
-  end_datetime: slot.end_datetime,
-  session_duration: 0,
-});
+          doctor_id: doctor?.id || 0,
+          doctor_name: doctorName || `Doctor #${doctor?.id}`,
+          doctor_specialization: doctor?.specialization || '',
+          start_datetime: slot.start_datetime,
+          end_datetime: slot.end_datetime,
+          session_duration: 0,
+        });
+
         this.bookingSuccess = 'Appointment booked successfully!';
         this.bookingInProgress = false;
         this.selectedSlot = null;
         this.cdr.detectChanges();
 
-        // Refresh slots and appointments
         this.loadSlots();
         this.loadAppointments();
       },
@@ -207,18 +226,105 @@ export class DashboardComponent implements OnInit {
     this.appointmentService.getMyAppointments().subscribe({
       next: (data: Appointment[]) => {
         this.appointments = data;
-        this.upcomingAppointments = data.filter((a: Appointment) =>
-          ['SCHEDULED', 'CONFIRMED', 'CHECKED_IN'].includes(a.status)
-        );
-        this.pastAppointments = data.filter((a: Appointment) =>
-          ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status)
-        );
+        this.splitAppointments();
+        this.appointmentsLoaded = true;
         this.appointmentsLoading = false;
         this.cdr.detectChanges();
+
+        // Try resolving uncached appointments
+        this.tryResolveUncached();
       },
       error: () => {
         this.appointmentsLoading = false;
         this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private splitAppointments(): void {
+    this.upcomingAppointments = this.appointments.filter((a: Appointment) =>
+      ['SCHEDULED', 'CONFIRMED', 'CHECKED_IN'].includes(a.status)
+    );
+    this.pastAppointments = this.appointments.filter((a: Appointment) =>
+      ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status)
+    );
+  }
+
+  // ==================== RESOLVE UNCACHED APPOINTMENTS ====================
+
+  private tryResolveUncached(): void {
+    if (!this.doctorsLoaded || !this.appointmentsLoaded) return;
+
+    // Find appointments that have no cached doctor_name and still have a valid slot
+    const uncached = this.appointments.filter(
+      a => !a.doctor_name && a.slot_id && a.slot_id > 0
+    );
+
+    if (uncached.length === 0) return;
+
+    // Search through each doctor's slots to find matches
+    this.resolveFromDoctor(0, uncached);
+  }
+
+  private resolveFromDoctor(doctorIndex: number, uncached: Appointment[]): void {
+    // Stop if we've checked all doctors or resolved all appointments
+    if (doctorIndex >= this.doctors.length) return;
+    if (uncached.every(a => a.doctor_name)) return;
+
+    const doctor = this.doctors[doctorIndex];
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 30);
+    const end = new Date(today);
+    end.setDate(end.getDate() + 60);
+
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = end.toISOString().split('T')[0];
+
+    this.doctorService.getDoctorSlots(doctor.id, startStr, endStr).subscribe({
+      next: (res: any) => {
+        const slots: Slot[] = res.slots || [];
+        const slotMap = new Map(slots.map((s: Slot) => [s.id, s]));
+        const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim();
+
+        let resolved = false;
+
+        for (const apt of uncached) {
+          if (!apt.doctor_name && slotMap.has(apt.slot_id)) {
+            const slot = slotMap.get(apt.slot_id)!;
+
+            // Update appointment in place
+            apt.doctor_name = doctorName;
+            apt.doctor_specialization = doctor.specialization;
+            apt.doctor_id = doctor.id;
+            apt.start_datetime = slot.start_datetime;
+            apt.end_datetime = slot.end_datetime;
+
+            // Cache for future page loads
+            this.appointmentService.cacheBooking(apt.id, {
+              doctor_id: doctor.id,
+              doctor_name: doctorName,
+              doctor_specialization: doctor.specialization,
+              start_datetime: slot.start_datetime,
+              end_datetime: slot.end_datetime,
+              session_duration: 0,
+            });
+
+            resolved = true;
+          }
+        }
+
+        if (resolved) {
+          this.splitAppointments();
+          this.cdr.detectChanges();
+        }
+
+        // Continue with next doctor for remaining unresolved
+        this.resolveFromDoctor(doctorIndex + 1, uncached);
+      },
+      error: () => {
+        // Skip this doctor, try next
+        this.resolveFromDoctor(doctorIndex + 1, uncached);
       },
     });
   }
@@ -240,10 +346,8 @@ export class DashboardComponent implements OnInit {
 
   getStatusBadgeClass(status: string): string {
     const map: Record<string, string> = {
-      SCHEDULED:
-        'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
-      CONFIRMED:
-        'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
+      SCHEDULED: 'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
+      CONFIRMED: 'bg-secondary-fixed/40 text-on-secondary-fixed-variant',
       CHECKED_IN: 'bg-green-100 text-green-700',
       COMPLETED: 'bg-blue-100 text-blue-700',
       CANCELLED: 'bg-slate-200 text-slate-600',
@@ -266,8 +370,7 @@ export class DashboardComponent implements OnInit {
 
   getStatusIconBg(status: string): string {
     const map: Record<string, string> = {
-      SCHEDULED:
-        'bg-surface-container-highest text-slate-400',
+      SCHEDULED: 'bg-surface-container-highest text-slate-400',
       CONFIRMED: 'bg-secondary-container/20 text-secondary',
       CHECKED_IN: 'bg-green-100 text-green-700',
       COMPLETED: 'bg-blue-100 text-blue-700',

@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AppointmentService } from '../../services/appointment';
 import { Appointment } from '../../models/appointment.model';
@@ -28,15 +28,21 @@ export class MyAppointmentsComponent implements OnInit {
 
   constructor(
     private appointmentService: AppointmentService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
     this.loadAppointments();
   }
 
+  goBack(): void {
+    this.location.back();
+  }
+
   loadAppointments(): void {
     this.loading = true;
+    this.errorMsg = '';
     this.cdr.detectChanges();
 
     this.appointmentService.getMyAppointments().subscribe({
@@ -47,7 +53,7 @@ export class MyAppointmentsComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.errorMsg = 'Failed to load appointments.';
+        this.errorMsg = 'Failed to load appointments. Please check your connection and try again.';
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -69,6 +75,38 @@ export class MyAppointmentsComponent implements OnInit {
     }
   }
 
+  getCountForFilter(value: string): number {
+    return this.appointments.filter((a) => a.status === value).length;
+  }
+
+  getActiveFilterLabel(): string {
+    const found = this.filters.find((f) => f.value === this.activeFilter);
+    return found ? found.label : '';
+  }
+
+  getUpcomingAppointments(): Appointment[] {
+    if (this.activeFilter !== 'ALL') return [];
+    const upcomingStatuses = ['SCHEDULED', 'CONFIRMED', 'CHECKED_IN'];
+    return this.appointments.filter((a) => upcomingStatuses.includes(a.status));
+  }
+
+  getPastAppointments(): Appointment[] {
+    if (this.activeFilter !== 'ALL') return [];
+    const pastStatuses = ['COMPLETED', 'CANCELLED', 'NO_SHOW'];
+    return this.appointments.filter((a) => pastStatuses.includes(a.status));
+  }
+
+  getInitials(name: string | undefined): string {
+    if (!name) return '??';
+    return name
+      .split(' ')
+      .filter((n) => n.length > 0)
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
   getStatusColor(status: string): string {
     const colors: Record<string, string> = {
       SCHEDULED: 'bg-surface-container-highest text-slate-600',
@@ -79,6 +117,42 @@ export class MyAppointmentsComponent implements OnInit {
       NO_SHOW: 'bg-error-container/50 text-error',
     };
     return colors[status] || 'bg-slate-100 text-slate-500';
+  }
+
+  getStatusBadgeColor(status: string): string {
+    const colors: Record<string, string> = {
+      SCHEDULED: 'bg-slate-100 text-slate-600',
+      CONFIRMED: 'bg-secondary/10 text-secondary',
+      CHECKED_IN: 'bg-amber-100 text-amber-700',
+      COMPLETED: 'bg-blue-50 text-blue-700',
+      CANCELLED: 'bg-error-container text-error',
+      NO_SHOW: 'bg-error-container/50 text-error',
+    };
+    return colors[status] || 'bg-slate-100 text-slate-500';
+  }
+
+  getStatusDotColor(status: string): string {
+    const colors: Record<string, string> = {
+      SCHEDULED: 'bg-slate-400',
+      CONFIRMED: 'bg-secondary',
+      CHECKED_IN: 'bg-amber-500',
+      COMPLETED: 'bg-secondary',
+      CANCELLED: 'bg-error',
+      NO_SHOW: 'bg-slate-300',
+    };
+    return colors[status] || 'bg-slate-300';
+  }
+
+  getStatusTextColor(status: string): string {
+    const colors: Record<string, string> = {
+      SCHEDULED: 'text-slate-500',
+      CONFIRMED: 'text-secondary',
+      CHECKED_IN: 'text-amber-600',
+      COMPLETED: 'text-secondary',
+      CANCELLED: 'text-error',
+      NO_SHOW: 'text-slate-400',
+    };
+    return colors[status] || 'text-slate-400';
   }
 
   getStatusIcon(status: string): string {

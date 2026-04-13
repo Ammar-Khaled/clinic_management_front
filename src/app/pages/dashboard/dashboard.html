@@ -3,10 +3,10 @@
   <div class="flex items-center gap-8">
     <span class="font-headline text-xl font-bold text-blue-900">Clinical Curator</span>
     <div class="hidden md:flex gap-6 font-body text-sm tracking-tight">
-  <a class="text-blue-700 font-semibold" routerLink="/dashboard">Dashboard</a>
-  <a class="text-slate-500 hover:text-blue-700 transition-colors" routerLink="/my-appointments">Appointments</a>
-  <a class="text-slate-500 hover:text-blue-700 transition-colors" routerLink="/profile">Profile</a>
-</div>
+      <a class="text-blue-700 font-semibold" routerLink="/dashboard">Dashboard</a>
+      <a class="text-slate-500 hover:text-blue-700 transition-colors" routerLink="/my-appointments">Appointments</a>
+      <a class="text-slate-500 hover:text-blue-700 transition-colors" routerLink="/profile">Profile</a>
+    </div>
   </div>
   <div class="flex items-center gap-4">
     <button class="p-2 text-slate-500 hover:bg-blue-50 rounded-full">
@@ -14,8 +14,8 @@
     </button>
     <div class="flex items-center gap-3 pl-4 border-l border-outline-variant">
       <div class="text-right hidden sm:block" *ngIf="profile">
-        <p class="text-xs font-bold text-blue-900">Patient #{{ profile.id }}</p>
-        <p class="text-[10px] text-slate-500">{{ profile.phone_number }}</p>
+        <p class="text-xs font-bold text-blue-900">{{ patientName }}</p>
+        <p class="text-[10px] text-slate-500">{{ profile.email || profile.phone_number }}</p>
       </div>
       <button (click)="logout()"
               class="h-9 w-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary text-xs font-bold"
@@ -33,7 +33,7 @@
   <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
     <div>
       <h1 class="text-3xl font-headline font-extrabold text-blue-900 tracking-tight">
-        Good {{ getGreeting() }}, Patient
+        Good {{ getGreeting() }}, {{ patientName }}
       </h1>
       <p class="text-slate-500 mt-1">Manage your health appointments and medical profile.</p>
     </div>
@@ -88,7 +88,7 @@
                     class="w-full bg-slate-50 border-outline-variant rounded-lg text-sm">
               <option [ngValue]="null">Choose a doctor...</option>
               <option *ngFor="let doc of filteredDoctors" [ngValue]="doc.id">
-                Doctor #{{ doc.id }} — {{ doc.specialization }}
+                Dr. {{ doc.first_name }} {{ doc.last_name }} — {{ doc.specialization }}
               </option>
             </select>
           </div>
@@ -96,25 +96,21 @@
 
         <!-- Slots -->
         <div class="space-y-2">
-          <!-- Loading -->
           <div *ngIf="slotsLoading" class="flex items-center justify-center py-6">
             <span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
             <span class="ml-2 text-sm text-slate-500">Loading available times...</span>
           </div>
 
-          <!-- No doctor selected -->
           <p *ngIf="!selectedDoctorId && !slotsLoading"
              class="text-xs text-slate-400 italic py-4 text-center">
             Select a doctor and date to see available slots
           </p>
 
-          <!-- No slots found -->
           <p *ngIf="selectedDoctorId && !slotsLoading && availableSlots.length === 0 && bookingDate"
              class="text-xs text-slate-500 py-4 text-center">
             No available times for {{ bookingDate }}. Try another date.
           </p>
 
-          <!-- Available slots grid -->
           <div *ngIf="!slotsLoading && availableSlots.length > 0">
             <p class="text-xs font-bold text-slate-500 mb-3">
               Available Times for {{ formatDate(bookingDate) }}
@@ -131,7 +127,6 @@
             </div>
           </div>
 
-          <!-- Book Button -->
           <button (click)="bookAppointment()"
                   [disabled]="!selectedSlot || bookingInProgress"
                   class="w-full mt-6 rounded-xl py-3 px-6 font-headline font-bold text-sm flex items-center justify-center gap-2 transition-colors"
@@ -154,19 +149,16 @@
           </span>
         </div>
 
-        <!-- Loading -->
         <div *ngIf="appointmentsLoading" class="flex items-center justify-center py-8">
           <span class="material-symbols-outlined animate-spin text-primary text-3xl">progress_activity</span>
         </div>
 
-        <!-- Empty -->
         <div *ngIf="!appointmentsLoading && upcomingAppointments.length === 0"
              class="bg-white p-8 rounded-3xl border border-outline-variant/30 shadow-sm text-center">
           <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">calendar_month</span>
           <p class="text-slate-500 text-sm">No active appointments. Book one above!</p>
         </div>
 
-        <!-- Cards -->
         <div *ngIf="!appointmentsLoading" class="space-y-4">
           <div *ngFor="let apt of upcomingAppointments"
                class="bg-white p-5 rounded-3xl border border-outline-variant/30 shadow-sm flex flex-col md:flex-row md:items-center gap-6">
@@ -244,8 +236,6 @@
 
       <!-- Profile Card -->
       <section class="bg-white rounded-3xl p-8 border border-outline-variant/30 shadow-sm text-center">
-
-        <!-- Loading -->
         <div *ngIf="profileLoading" class="flex justify-center py-8">
           <span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
         </div>
@@ -256,8 +246,9 @@
               <span class="material-symbols-outlined text-on-primary text-4xl">person</span>
             </div>
           </div>
-          <h3 class="text-2xl font-headline font-extrabold text-blue-900">Patient</h3>
-          <p class="text-slate-500 text-sm mb-6">Patient ID: #{{ profile.id }}</p>
+          <h3 class="text-2xl font-headline font-extrabold text-blue-900">{{ patientName }}</h3>
+          <p *ngIf="profile.email" class="text-slate-500 text-sm">{{ profile.email }}</p>
+          <p class="text-slate-400 text-xs mb-6">Patient ID: #{{ profile.id }}</p>
 
           <div class="space-y-3 text-left">
             <div class="bg-slate-50 p-3.5 rounded-2xl flex items-center justify-between">
@@ -303,6 +294,12 @@
               <span class="text-xs font-bold text-blue-900">{{ profile.allergies }}</span>
             </div>
           </div>
+
+          <a routerLink="/profile"
+             class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+            <span class="material-symbols-outlined text-sm">edit</span>
+            Edit Profile
+          </a>
         </div>
       </section>
 

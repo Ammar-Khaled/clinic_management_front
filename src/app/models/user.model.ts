@@ -11,6 +11,9 @@ export interface LoginResponse {
 export interface PatientProfile {
   id?: number;
   user?: number;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
   date_of_birth: string;
   gender: string;
   phone_number: string;
@@ -45,6 +48,7 @@ export interface RegisterResponse {
   profile: PatientProfile;
 }
 
+// --- Admin types (used by AdminDashboard) ---
 export interface User {
   id?: string | number;
   username?: string;
@@ -56,9 +60,15 @@ export interface User {
   is_active?: boolean;
 }
 
-// Analytics and Appointments Status mapping
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
 export interface DailyAppointmentStat {
-  day: string; // e.g. "Mon"
+  day: string;
   percentage: number;
 }
 
@@ -72,11 +82,4 @@ export interface AppointmentsAnalytics {
   growthPercentage?: number;
   volume?: DailyAppointmentStat[];
   statuses?: AppointmentStatusStat[];
-}
-
-export interface PaginatedResponse<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: T[];
 }

@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+/* Smooth scrollbar for filter tabs */
+.overflow-x-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Table row click effect */
+table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+/* Card hover lift effect */
+a[class*="rounded-3xl"]:hover {
+  transform: translateY(-2px);
+}
+
+a[class*="rounded-3xl"] {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}

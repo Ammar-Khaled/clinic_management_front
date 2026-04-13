@@ -138,23 +138,21 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
         const slots = res.slots || [];
         const matchedSlot = slots.find((s: any) => s.id === appointment.slot_id);
 
-        if (matchedSlot) {
-          // Found it — update appointment and cache
-          this.appointment!.start_datetime = matchedSlot.start_datetime;
-          this.appointment!.end_datetime = matchedSlot.end_datetime;
-          this.appointment!.doctor_id = doctor.id;
-          this.appointment!.doctor_name = `Doctor #${doctor.id}`;
-          this.appointment!.doctor_specialization = doctor.specialization || '';
+      if (matchedSlot) {
+  this.appointment!.start_datetime = matchedSlot.start_datetime;
+  this.appointment!.end_datetime = matchedSlot.end_datetime;
+  this.appointment!.doctor_id = doctor.id;
+  this.appointment!.doctor_name = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim();
+  this.appointment!.doctor_specialization = doctor.specialization || '';
 
-          // Save to cache for future
-          this.appointmentService.cacheBooking(appointment.id, {
-            doctor_id: doctor.id,
-            doctor_name: `Doctor #${doctor.id}`,
-            doctor_specialization: doctor.specialization || '',
-            start_datetime: matchedSlot.start_datetime,
-            end_datetime: matchedSlot.end_datetime,
-            session_duration: 0,
-          });
+  this.appointmentService.cacheBooking(appointment.id, {
+    doctor_id: doctor.id,
+    doctor_name: `Dr. ${doctor.first_name} ${doctor.last_name}`.trim(),
+    doctor_specialization: doctor.specialization || '',
+    start_datetime: matchedSlot.start_datetime,
+    end_datetime: matchedSlot.end_datetime,
+    session_duration: 0,
+  });
 
           // Restart countdown if checked in
           if (this.appointment!.status === 'CHECKED_IN') {

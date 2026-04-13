@@ -15,13 +15,13 @@ import { PatientProfile } from '../../models/user.model';
 })
 export class ProfileComponent implements OnInit {
   profile: PatientProfile | null = null;
+  patientName = '';
   loading = true;
   editing = false;
   saving = false;
   successMsg = '';
   errorMsg = '';
 
-  // Edit form fields
   form = {
     phone_number: '',
     height: '',
@@ -48,6 +48,7 @@ export class ProfileComponent implements OnInit {
     this.patientService.getProfile().subscribe({
       next: (data) => {
         this.profile = data;
+        this.patientName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Patient';
         this.populateForm(data);
         this.loading = false;
         this.cdr.detectChanges();
@@ -92,13 +93,13 @@ export class ProfileComponent implements OnInit {
       allergies: this.form.allergies,
       blood_type: this.form.blood_type,
     };
-
     if (this.form.height) payload.height = parseFloat(this.form.height);
     if (this.form.weight) payload.weight = parseFloat(this.form.weight);
 
     this.patientService.updateProfile(payload).subscribe({
       next: (data) => {
         this.profile = data;
+        this.patientName = `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Patient';
         this.populateForm(data);
         this.editing = false;
         this.saving = false;
