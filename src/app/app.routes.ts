@@ -14,6 +14,7 @@ export const routes: Routes = [
   { path: 'appointments/:id', loadComponent: () => import('./pages/appointment-detail/appointment-detail').then(m => m.AppointmentDetailComponent), canActivate: [authGuard] },
   { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent), canActivate: [authGuard] },
   { path: 'my-appointments', loadComponent: () => import('./pages/my-appointments/my-appointments').then(m => m.MyAppointmentsComponent), canActivate: [authGuard] },
+  { path: 'doctor-dashboard', loadComponent: () => import('./pages/doctor-dashboard/doctor-dashboard').then(m => m.DoctorDashboardComponent), canActivate: [authGuard] },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' },
 ];
