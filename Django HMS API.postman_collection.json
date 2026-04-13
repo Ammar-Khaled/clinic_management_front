@@ -1,0 +1,1606 @@
+{
+  "info": {
+    "_postman_id": "5b47349d-1f72-4e93-a9a4-36b5a7ebe5b5",
+    "name": "Django HMS API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53587217",
+    "_collection_link": "https://go.postman.co/collection/53587217-5b47349d-1f72-4e93-a9a4-36b5a7ebe5b5?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Bootstrap",
+      "item": [
+        {
+          "name": "Doctor Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\" : \"abdo\" ,\r\n    \"password\" : \"abdo\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{apiUrl}}/auth/login",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Receptionist Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/auth/login",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/admin/login",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ammar/users-app",
+      "item": [
+        {
+          "name": "auth",
+          "item": [
+            {
+              "name": "Login & Get token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const body = pm.response.json();\r",
+                      "\r",
+                      "pm.environment.set('access_token', body.access);\r",
+                      "pm.environment.set('refresh_token', body.refresh);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Refresh token",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "body = pm.response.json()\r",
+                      "pm.environment.set(\"access_token\", body.access);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"refresh\":\"{{refresh_token}}\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/token/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "token",
+                    "refresh"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "logout",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"refresh\": \"{{refresh_token}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/logout",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "logout"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "groups (viewset)",
+          "item": []
+        }
+      ]
+    },
+    {
+      "name": "users (viewset)",
+      "item": [
+        {
+          "name": "Get all Users",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "ADMIN",
+                  "disabled": true
+                },
+                {
+                  "key": "is_active",
+                  "value": "false",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "kh",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"abdo\", \"password\": \"abdoibraheem123\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update user",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"first_name\": \"abdo\", \"last_name\": \"ibraheem\" }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": null,
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": null,
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "patient",
+      "item": [
+        {
+          "name": "crud patient",
+          "item": [
+            {
+              "name": "register",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"username\": \"mareed\",\r\n    \"password\": \"123456\",\r\n    \"email\": \"patient1@test.com\",\r\n    \"first_name\": \"Ahmed\",\r\n    \"last_name\": \"Ali\",\r\n    \"profile\": {\r\n        \"date_of_birth\": \"1995-06-15\",\r\n        \"gender\": \"MALE\",\r\n        \"phone_number\": \"01012345678\",\r\n        \"height\": 175,\r\n        \"weight\": 80,\r\n        \"blood_type\": \"A+\",\r\n        \"allergies\": \"None\"\r\n    }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/patients/register",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const body = pm.response.json();\r",
+                      "\r",
+                      "pm.environment.set('access_token', body.access);\r",
+                      "pm.environment.set('refresh_token', body.refresh);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"username\": \"abdo-patient\",\r\n    \"password\": \"12345678\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": null,
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "patient/me",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1OTQ1OTI2LCJpYXQiOjE3NzU5NDU2MjYsImp0aSI6IjRhZmU2NjcwNjBiYTRiNzhhYjhiNjcxMjdjMjkzZDQ0IiwidXNlcl9pZCI6IjYifQ.7ZRa2nRn38pQkArT7Q9GELE1uRzNORn-THZXWOzFksY",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/patients/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update my profile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1ODU5ODU1LCJpYXQiOjE3NzU4NTk1NTUsImp0aSI6ImI3N2RjYzdlM2Y0ZDRmYjk4ZTgyNmY1YzRkMGRhNTA4IiwidXNlcl9pZCI6IjEifQ.cH0AIpEuabi-4ilnD6f1u2pwJ8j-TxLKMX-IvcjMTaY",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"first_name\": \"abdoooooo\",\r\n    \"last_name\": \"abdoooo\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/patients/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "booking",
+          "item": [
+            {
+              "name": "book existing free slot",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_patient}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "\r\n{\r\n    \"slot_id\": 471\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/patients/appointments",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "appointments"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get my appointments",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token_patient}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"username\": \"abdomahalawy11\",\r\n    \"password\": \"12345678\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/patients/appointments/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "appointments",
+                    "me"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": null,
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get appointments for specific id (app id)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1OTQ3Nzc0LCJpYXQiOjE3NzU5NDc0NzQsImp0aSI6IjExMjg4OWU0YmY2ZjRkN2Q4YzdiMGI2YTVlODg3NjkwIiwidXNlcl9pZCI6IjYifQ.uXnllI-jkZb4a5VxuyC8MFI2YJIFLc5JcRkezq_067I",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/patients/appointments/3",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "appointments",
+                    "3"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Doctors",
+      "item": [
+        {
+          "name": "Exceptions",
+          "item": [
+            {
+              "name": "Create Doctor Exception (VACATION_DAY)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"date\": \"2026-4-16\",\r\n  \"type\": \"VACATION_DAY\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/exceptions",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "exceptions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Doctor Exception (EXTRA_WORKING_DAY)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"date\": \"2026-4-15\",\r\n  \"type\": \"EXTRA_WORKING_DAY\",\r\n  \"start_time\": \"01:00\",\r\n  \"end_time\": \"12:30\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/exceptions",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "exceptions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Doctor Exception",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/exceptions/{{exception_id}}",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "exceptions",
+                    "{{exception_id}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Schedule",
+          "item": [
+            {
+              "name": "Get Doctor Schedule",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/availability",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "availability"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Doctor Schedule (Similar Weekdays)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"similar_weekdays\": \"true\",\r\n        \"availability\": [\r\n            {\r\n                \"start_time\": \"9:00\",\r\n                \"end_time\": \"17:00\"\r\n            }\r\n        ]\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/availability",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "availability"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Doctor Schedule (Different Weekdays)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n        \"similar_weekdays\": \"false\",\r\n        \"availability\": [\r\n            {\r\n                \"day_of_week\": \"1\",\r\n                \"start_time\": \"09:00\",\r\n                \"end_time\": \"16:00\"\r\n            },\r\n            {\r\n                \"day_of_week\": \"2\",\r\n                \"start_time\": \"10:00\",\r\n                \"end_time\": \"12:00\"\r\n            },\r\n            {\r\n                \"day_of_week\": \"3\",\r\n                \"start_time\": \"10:00\",\r\n                \"end_time\": \"16:00\"\r\n            },\r\n            {\r\n                \"day_of_week\": \"4\",\r\n                \"start_time\": \"10:00\",\r\n                \"end_time\": \"16:00\"\r\n            },\r\n            {\r\n                \"day_of_week\": \"5\",\r\n                \"start_time\": \"10:00\",\r\n                \"end_time\": \"13:00\"\r\n            }\r\n        ]\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/availability",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "availability"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Doctor Schedule",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"availability\": [\r\n        {\r\n            \"start_time\": \"01:00\",\r\n            \"end_time\": \"16:00\"\r\n        }\r\n    ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/availability/{{availability_id}}",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "availability",
+                    "{{availability_id}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Doctor Schedule",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/availability",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "availability"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Slots",
+          "item": [
+            {
+              "name": "Get Doctor Slots",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/slots",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "slots"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Regenerate Doctor Slots",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{apiUrl}}/doctors/{{doctor_id}}/slots/regenerate",
+                  "host": [
+                    "{{apiUrl}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "{{doctor_id}}",
+                    "slots",
+                    "regenerate"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get All Doctors",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/doctors/",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "doctors",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get doctor profile (self)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/doctors/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctors",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Doctor schedule (self)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/doctors/me/schedule?date=2026-04-12",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "doctors",
+                "me",
+                "schedule"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-04-12"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "consultation",
+      "item": [
+        {
+          "name": "get",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/appointments/:id/consultation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "appointments",
+                ":id",
+                "consultation"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/appointments/:id/consultation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "appointments",
+                ":id",
+                "consultation"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/appointments/:id/consultation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "appointments",
+                ":id",
+                "consultation"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Status",
+          "item": [
+            {
+              "name": "Confirm Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/confirm",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "confirm"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "complete Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/complete",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "complete"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Check-in Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"CHECKED_IN\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/check-in",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "check-in"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "No-show Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/no-show",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "no-show"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Decline Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"he is a theif\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/decline",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "decline"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Cancel Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Patient requested cancellation.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/cancel",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "cancel"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Reschedule Appointment",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"new_slot_id\": 467,\n  \"reason\": \"Patient unavailable at original time.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/appointments/{{appointment_id}}/reschedule",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "{{appointment_id}}",
+                    "reschedule"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get All Appointments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/appointments/",
+              "host": [
+                "{{apiUrl}}"
+              ],
+              "path": [
+                "appointments",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reschedule History",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/appointments/{{appointment_id}}/reschedule-history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "appointments",
+                "{{appointment_id}}",
+                "reschedule-history"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Queue Today",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/appointments/queue/today",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "appointments",
+                "queue",
+                "today"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "apiUrl",
+      "value": ""
+    },
+    {
+      "key": "doctor_id",
+      "value": ""
+    },
+    {
+      "key": "appointment_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
