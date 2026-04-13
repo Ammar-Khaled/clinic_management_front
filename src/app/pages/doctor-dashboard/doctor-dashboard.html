@@ -1,0 +1,252 @@
+<!-- Sub-header -->
+<div class="dw-subheader">
+  <div class="dw-subheader-brand">
+    <div class="dw-brand-dot"></div>
+    <div class="dw-brand-text">
+      <span class="dw-brand-name">Clinical</span>
+      <span class="dw-brand-name">Curator</span>
+    </div>
+  </div>
+  <div class="dw-search-wrapper">
+    <span class="material-symbols-outlined dw-search-icon">search</span>
+    <input
+      type="text"
+      class="dw-search-input"
+      placeholder="Search appointment..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
+  </div>
+  <div class="dw-doctor-profile">
+    <div class="dw-doctor-info">
+      <span class="dw-doctor-name">{{ doctorName() }}</span>
+      <span class="dw-doctor-spec">{{ doctorSpecialization() }}</span>
+    </div>
+    <img
+      [src]="getPatientAvatar(doctorName())"
+      alt="Doctor avatar"
+      class="dw-doctor-avatar"
+    />
+    <button class="dw-logout-btn" (click)="logout()" title="Logout">
+      <span class="material-symbols-outlined">logout</span>
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="dw-main">
+  <!-- Hero heading -->
+  <div class="dw-hero">
+    <h1 class="dw-hero-title">Doctor Workspace</h1>
+    <p class="dw-hero-subtitle">{{ todayDate() }} — {{ activeCount() }} Active appointments remaining today.</p>
+  </div>
+
+  <div class="dw-content-grid">
+    <!-- ====== LEFT SIDEBAR ====== -->
+    <div class="dw-sidebar">
+      <!-- Today's Queue -->
+      <div class="dw-queue-section">
+        <div class="dw-queue-header">
+          <div class="dw-queue-title-group">
+            <span class="material-symbols-outlined dw-queue-icon">schedule</span>
+            <span class="dw-queue-title">Today's Queue</span>
+          </div>
+          <span class="dw-badge dw-badge-arrived">ARRIVED TIME</span>
+        </div>
+
+        <div class="dw-queue-list">
+          <div
+            *ngFor="let patient of queue(); let i = index"
+            class="dw-queue-card"
+            [class.dw-queue-card--active]="selectedPatient()?.id === patient.id"
+            (click)="selectPatient(patient)"
+          >
+            <div class="dw-queue-card-top">
+              <span class="dw-check-time">● Checked-in: {{ patient.checkInTime }}</span>
+              <span class="dw-wait-time">Wait: {{ patient.waitMinutes }}m</span>
+            </div>
+            <div class="dw-queue-card-name">{{ patient.name }}</div>
+            <div class="dw-queue-card-detail">
+              {{ patient.visitType }} • ID: {{ patient.patientCode }}
+            </div>
+            <div class="dw-queue-card-actions" *ngIf="patient.status === 'IN_PROGRESS'">
+              <span class="dw-status-badge dw-status-progress">IN PROGRESS</span>
+            </div>
+            <div class="dw-queue-card-actions" *ngIf="patient.status === 'CHECKED_IN'">
+              <button class="dw-link-btn" (click)="startVisit(patient); $event.stopPropagation()">START VISIT</button>
+              <button class="dw-link-btn dw-link-btn--muted" (click)="markNoShow(patient); $event.stopPropagation()">MARK NO-SHOW</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Requests -->
+      <div class="dw-requests-section">
+        <div class="dw-requests-header">
+          <div class="dw-queue-title-group">
+            <span class="material-symbols-outlined dw-queue-icon">notifications</span>
+            <span class="dw-queue-title">Appointment Requests</span>
+          </div>
+          <button class="dw-confirm-all-btn" (click)="confirmAllRequests()">Confirm All</button>
+        </div>
+
+        <div class="dw-requests-list">
+          <div *ngFor="let req of appointmentRequests()" class="dw-request-card">
+            <div
+              class="dw-request-avatar"
+              [style.background-color]="req.bgColor"
+              [style.color]="req.textColor"
+            >
+              {{ req.initials }}
+            </div>
+            <div class="dw-request-info">
+              <span class="dw-request-name">{{ req.name }}</span>
+              <span class="dw-request-date">{{ req.date }}</span>
+            </div>
+            <div class="dw-request-actions">
+              <button class="dw-action-icon dw-action-accept" (click)="confirmRequest(req)">
+                <span class="material-symbols-outlined">check_circle</span>
+              </button>
+              <button class="dw-action-icon dw-action-decline" (click)="declineRequest(req)">
+                <span class="material-symbols-outlined">cancel</span>
+              </button>
+            </div>
+          </div>
+          <div *ngIf="appointmentRequests().length === 0" class="dw-empty-msg">
+            No pending requests
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== RIGHT PANEL - Consultation ====== -->
+    <div class="dw-consultation" *ngIf="selectedPatient() as patient">
+      <!-- Patient header -->
+      <div class="dw-patient-header">
+        <img
+          [src]="getPatientAvatar(patient.name)"
+          alt="Patient avatar"
+          class="dw-patient-avatar"
+        />
+        <div class="dw-patient-header-info">
+          <div class="dw-patient-name-row">
+            <h2 class="dw-patient-name">{{ patient.name }}</h2>
+            <span class="dw-badge dw-badge-consultation" *ngIf="patient.status === 'IN_PROGRESS'">IN CONSULTATION</span>
+          </div>
+          <div class="dw-patient-meta">
+            <span *ngIf="patient.age">{{ patient.age }} Years</span>
+            <span *ngIf="patient.gender"> • {{ patient.gender }}</span>
+            <span *ngIf="patient.allergies" class="dw-allergy-tag">
+              <span class="material-symbols-outlined dw-allergy-icon">warning</span>
+              {{ patient.allergies }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Diagnosis -->
+      <div class="dw-form-group">
+        <label class="dw-form-label">PRIMARY DIAGNOSIS</label>
+        <input
+          type="text"
+          class="dw-form-input"
+          placeholder="e.g., Mild Hypertension"
+          [ngModel]="diagnosis()"
+          (ngModelChange)="diagnosis.set($event)"
+        />
+      </div>
+
+      <!-- Clinical Notes -->
+      <div class="dw-form-group">
+        <label class="dw-form-label">CLINICAL NOTES</label>
+        <textarea
+          class="dw-form-textarea"
+          rows="4"
+          placeholder="Enter clinical findings and symptoms..."
+          [ngModel]="clinicalNotes()"
+          (ngModelChange)="clinicalNotes.set($event)"
+        ></textarea>
+      </div>
+
+      <!-- Prescription Plan -->
+      <div class="dw-form-group">
+        <label class="dw-form-label">PRESCRIPTION PLAN</label>
+        <div class="dw-rx-table">
+          <div class="dw-rx-header">
+            <span class="dw-rx-col dw-rx-col--name">DRUG NAME</span>
+            <span class="dw-rx-col dw-rx-col--dosage">DOSAGE</span>
+            <span class="dw-rx-col dw-rx-col--duration">DURATION</span>
+            <span class="dw-rx-col dw-rx-col--action">ACTION</span>
+          </div>
+          <div *ngFor="let rx of prescriptions(); let i = index" class="dw-rx-row">
+            <input
+              class="dw-rx-input dw-rx-col dw-rx-col--name"
+              placeholder="Drug name"
+              [ngModel]="rx.drugName"
+              (ngModelChange)="updatePrescription(i, 'drugName', $event)"
+            />
+            <input
+              class="dw-rx-input dw-rx-col dw-rx-col--dosage"
+              placeholder="Dosage"
+              [ngModel]="rx.dosage"
+              (ngModelChange)="updatePrescription(i, 'dosage', $event)"
+            />
+            <input
+              class="dw-rx-input dw-rx-col dw-rx-col--duration"
+              placeholder="Duration"
+              [ngModel]="rx.duration"
+              (ngModelChange)="updatePrescription(i, 'duration', $event)"
+            />
+            <button class="dw-rx-delete dw-rx-col dw-rx-col--action" (click)="removePrescription(i)">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+          <button class="dw-add-rx-btn" (click)="addPrescription()">
+            <span class="material-symbols-outlined">add_circle</span>
+            <span>Add medication...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Diagnostic Tests Requested -->
+      <div class="dw-form-group">
+        <label class="dw-form-label">DIAGNOSTIC TESTS REQUESTED</label>
+        <div class="dw-tests-row">
+          <div *ngFor="let test of diagnosticTests(); let i = index" class="dw-test-chip">
+            <span>{{ test }}</span>
+            <button class="dw-chip-remove" (click)="removeTest(i)">×</button>
+          </div>
+          <div class="dw-add-test-wrapper">
+            <span class="dw-add-test-plus">+</span>
+            <input
+              type="text"
+              class="dw-add-test-input"
+              placeholder="Add Test"
+              [ngModel]="newTestInput()"
+              (ngModelChange)="newTestInput.set($event)"
+              (keydown)="onTestKeydown($event)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom actions -->
+      <div class="dw-consultation-actions">
+        <button class="dw-btn dw-btn-noshow" (click)="markNoShow()">
+          <span class="material-symbols-outlined">event_busy</span>
+          Mark No-Show
+        </button>
+        <button class="dw-btn dw-btn-complete" (click)="completeConsultation()">
+          <span class="material-symbols-outlined">check_circle</span>
+          Complete Consultation
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty state when no patient selected -->
+    <div class="dw-consultation dw-empty-state" *ngIf="!selectedPatient()">
+      <span class="material-symbols-outlined dw-empty-icon">person_off</span>
+      <p class="dw-empty-text">Select a patient from the queue to begin consultation</p>
+    </div>
+  </div>
+</div>

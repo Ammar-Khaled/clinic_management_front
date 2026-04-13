@@ -1,0 +1,161 @@
+<nav class="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5">
+  <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6">
+    <div class="flex items-center gap-8">
+      <span class="font-headline text-xl font-extrabold text-primary">Clinical Curator</span>
+      <div class="hidden items-center gap-6 text-sm font-semibold md:flex">
+        <a routerLink="/receptionist/dashboard" class="border-b-2 border-primary pb-1 text-primary">Dashboard</a>
+        <a routerLink="/receptionist/schedules" class="text-slate-500 transition-colors hover:text-primary">Schedules</a>
+        <a routerLink="/receptionist/slots" class="text-slate-500 transition-colors hover:text-primary">Slots</a>
+      </div>
+    </div>
+    <div class="text-right">
+      <p class="text-xs font-bold text-primary">Reception Desk</p>
+      <p class="text-[10px] text-slate-500">Non-Clinical Access Only</p>
+    </div>
+  </div>
+</nav>
+
+<main class="mx-auto min-h-screen max-w-7xl px-6 pb-12 pt-24">
+  <header class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <div>
+      <h1 class="mb-2 text-4xl font-headline font-extrabold tracking-tight text-on-surface">Receptionist Console</h1>
+      <p class="text-on-surface-variant/80">Schedule Management and Patient Flow</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <select
+        class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold"
+        [(ngModel)]="selectedDoctorId"
+        (ngModelChange)="refreshDoctorPanels()"
+      >
+        <option [ngValue]="null">Select doctor</option>
+        <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
+          Doctor #{{ doctor.id }} - {{ doctor.specialization }}
+        </option>
+      </select>
+
+      <button
+        class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-container px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+        [disabled]="regenerating"
+        (click)="regenerateAllDoctorsSlots()"
+      >
+        <span class="material-symbols-outlined text-base">autorenew</span>
+        {{ regenerating ? 'Regenerating...' : 'Regenerate Next 7 Days' }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="statusMessage" class="mb-4 rounded-xl bg-secondary-container/40 px-4 py-3 text-sm text-on-secondary-container">
+    {{ statusMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="mb-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">
+    {{ errorMessage }}
+  </div>
+
+  <section class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+    <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Selected Doctor</p>
+      <p class="mt-2 text-lg font-bold text-primary">
+        {{ selectedDoctor ? ('Doctor #' + selectedDoctor.id) : 'Not selected' }}
+      </p>
+      <p class="text-xs text-slate-500">{{ selectedDoctor?.specialization || 'Choose a physician' }}</p>
+    </article>
+
+    <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Slots (7 Days)</p>
+      <p class="mt-2 text-2xl font-extrabold text-primary">{{ totalSlots }}</p>
+      <p class="text-xs text-slate-500">{{ today }} to {{ endDate }}</p>
+    </article>
+
+    <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Booking Snapshot</p>
+      <p class="mt-2 text-sm font-semibold text-green-700">Available: {{ availableSlots }}</p>
+      <p class="text-sm font-semibold text-rose-700">Booked: {{ bookedSlots }}</p>
+    </article>
+  </section>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <section class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm lg:col-span-8">
+      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+        <div>
+          <h2 class="text-xl font-bold text-on-surface">Slots Preview</h2>
+          <p class="text-xs text-slate-500">Administrative view for selected doctor</p>
+        </div>
+        <button class="text-xs font-bold text-primary" (click)="refreshDoctorPanels()">Refresh</button>
+      </div>
+
+      <div *ngIf="loadingSlots || loadingDoctors" class="flex items-center justify-center py-10 text-slate-500">
+        <span class="material-symbols-outlined mr-2 animate-spin">progress_activity</span>
+        Loading slots...
+      </div>
+
+      <div *ngIf="!loadingSlots && visibleSlots.length === 0" class="px-6 py-10 text-center text-sm text-slate-500">
+        No slots available for this doctor/date range.
+      </div>
+
+      <div class="overflow-x-auto" *ngIf="!loadingSlots && visibleSlots.length > 0">
+        <table class="w-full min-w-[640px] border-collapse text-left">
+          <thead>
+            <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <th class="px-6 py-3">Date</th>
+              <th class="px-6 py-3">Time</th>
+              <th class="px-6 py-3">Slot ID</th>
+              <th class="px-6 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            <tr *ngFor="let slot of visibleSlots; trackBy: trackBySlotId">
+              <td class="px-6 py-4">{{ formatSlotDate(slot.start_datetime) }}</td>
+              <td class="px-6 py-4">{{ formatSlotTime(slot.start_datetime) }}</td>
+              <td class="px-6 py-4">#SLT-{{ slot.id }}</td>
+              <td class="px-6 py-4">
+                <span
+                  class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
+                  [ngClass]="slot.is_booked ? 'bg-error-container text-error' : 'bg-secondary-container text-on-secondary-container'"
+                >
+                  {{ slot.is_booked ? 'Booked' : 'Available' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="space-y-6 lg:col-span-4">
+      <section class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div class="mb-3 flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-slate-500">Weekly Availability</h3>
+          <a routerLink="/receptionist/schedules" class="text-xs font-bold text-primary">Edit</a>
+        </div>
+
+        <div *ngIf="loadingAvailability" class="py-6 text-center text-sm text-slate-500">
+          Loading availability...
+        </div>
+
+        <div *ngIf="!loadingAvailability && availability.length === 0" class="py-6 text-center text-sm text-slate-500">
+          No weekly availability configured.
+        </div>
+
+        <div class="space-y-2" *ngIf="!loadingAvailability && availability.length > 0">
+          <div
+            *ngFor="let item of availability; trackBy: trackByAvailabilityId"
+            class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2"
+          >
+            <p class="text-xs font-bold text-on-surface">{{ dayLabel(item.day_of_week) }}</p>
+            <p class="text-[11px] text-slate-500">{{ item.start_time }} - {{ item.end_time }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-3xl border border-slate-100 bg-slate-50 p-6">
+        <h3 class="mb-2 text-lg font-bold text-on-surface">Quick Actions</h3>
+        <p class="mb-4 text-sm text-slate-500">Open dedicated pages for deeper operations.</p>
+        <div class="grid grid-cols-1 gap-2">
+          <a routerLink="/receptionist/schedules" class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-primary">Manage Schedules & Exceptions</a>
+          <a routerLink="/receptionist/slots" class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-primary">Manage Slots</a>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>

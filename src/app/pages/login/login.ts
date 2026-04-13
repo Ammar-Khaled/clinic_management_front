@@ -44,31 +44,23 @@ export class LoginComponent {
         try {
           const payloadStr = atob(res.access.split('.')[1]);
           const payload = JSON.parse(payloadStr);
-          const userId = payload.user_id;
-          
-          if (userId && !returnUrl) {
-            this.auth.getUserDetails(userId).subscribe({
-              next: (user) => {
-                const role = user.role?.toUpperCase();
-                switch (role) {
-                  case 'ADMIN':
-                    returnUrl = '/admin-dashboard';
-                    break;
-                  case 'DOCTOR':
-                    returnUrl = '/doctor-slots'; // Assume doctor dashboard or slots
-                    break;
-                  case 'RECEPTIONIST':
-                    returnUrl = '/receptionist';
-                    break;
-                  case 'PATIENT':
-                  default:
-                    returnUrl = '/dashboard';
-                }
-                this.router.navigateByUrl(returnUrl);
-              },
-              error: () => this.router.navigateByUrl('/dashboard')
-            });
-            return; // Navigation handled asynchronously
+          const role = (payload.role || '').toUpperCase();
+
+          if (!returnUrl) {
+            switch (role) {
+              case 'ADMIN':
+                returnUrl = '/admin-dashboard';
+                break;
+              case 'DOCTOR':
+                returnUrl = '/doctor-dashboard';
+                break;
+              case 'RECEPTIONIST':
+                returnUrl = '/receptionist';
+                break;
+              case 'PATIENT':
+              default:
+                returnUrl = '/dashboard';
+            }
           }
         } catch (e) {
           console.warn('Error parsing token payload:', e);

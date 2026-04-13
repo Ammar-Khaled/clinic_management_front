@@ -1,0 +1,123 @@
+<nav class="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5">
+  <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6">
+    <div class="flex items-center gap-8">
+      <span class="font-headline text-xl font-extrabold text-primary">Clinical Curator</span>
+      <div class="hidden items-center gap-6 text-sm font-semibold md:flex">
+        <a routerLink="/receptionist/dashboard" class="text-slate-500 transition-colors hover:text-primary">Dashboard</a>
+        <a routerLink="/receptionist/schedules" class="text-slate-500 transition-colors hover:text-primary">Schedules</a>
+        <a routerLink="/receptionist/slots" class="border-b-2 border-primary pb-1 text-primary">Slots</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="mx-auto max-w-screen-2xl px-8 pb-16 pt-24">
+  <header class="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+    <div class="max-w-2xl">
+      <h1 class="mb-2 text-4xl font-headline font-extrabold tracking-tight text-primary">Appointment Slot Management</h1>
+      <p class="text-on-surface-variant text-lg">Manage availability and synchronize booking windows across doctors.</p>
+    </div>
+    <button
+      class="flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary to-primary-container px-6 py-3 font-semibold text-on-primary shadow-lg disabled:opacity-60"
+      [disabled]="regenerating"
+      (click)="regenerateForAllDoctors()"
+    >
+      <span class="material-symbols-outlined">autorenew</span>
+      {{ regenerating ? 'Regenerating...' : 'Regenerate Slots for All Doctors' }}
+    </button>
+  </header>
+
+  <div *ngIf="statusMessage" class="mb-4 rounded-xl bg-secondary-container/40 px-4 py-3 text-sm text-on-secondary-container">
+    {{ statusMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="mb-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">
+    {{ errorMessage }}
+  </div>
+
+  <section class="mb-8 rounded-2xl bg-surface-container-low p-8">
+    <div class="flex flex-col items-end gap-4 md:flex-row md:items-center">
+      <div class="w-full flex-1">
+        <label class="mb-2 block text-sm font-semibold text-primary">Select Doctor</label>
+        <select class="w-full rounded-xl border-none bg-surface-container-lowest px-4 py-3" [(ngModel)]="selectedDoctorId" (ngModelChange)="loadSlots()">
+          <option [ngValue]="null">Select doctor</option>
+          <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
+            Doctor #{{ doctor.id }} - {{ doctor.specialization }}
+          </option>
+        </select>
+      </div>
+
+      <div class="w-full md:w-52">
+        <label class="mb-2 block text-sm font-semibold text-primary">Start Date</label>
+        <input type="date" class="w-full rounded-xl border-none bg-surface-container-lowest px-4 py-3" [(ngModel)]="startDate" />
+      </div>
+
+      <div class="w-full md:w-52">
+        <label class="mb-2 block text-sm font-semibold text-primary">End Date</label>
+        <input type="date" class="w-full rounded-xl border-none bg-surface-container-lowest px-4 py-3" [(ngModel)]="endDate" />
+      </div>
+
+      <button class="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white" (click)="loadSlots()">
+        Load
+      </button>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-600">Total Slots: <span class="text-primary">{{ totalCount }}</span></div>
+      <div class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-600">Available: <span class="text-secondary">{{ availableCount }}</span></div>
+      <div class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-600">Booked: <span class="text-error">{{ bookedCount }}</span></div>
+    </div>
+  </section>
+
+  <div *ngIf="loadingSlots || loadingDoctors" class="py-10 text-center text-slate-500">
+    <span class="material-symbols-outlined mr-1 animate-spin">progress_activity</span>
+    Loading slots...
+  </div>
+
+  <div *ngIf="!loadingSlots && grouped.length === 0" class="rounded-xl bg-slate-50 p-10 text-center text-sm text-slate-500">
+    No slots found for this selection.
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-7" *ngIf="!loadingSlots && grouped.length > 0">
+    <section *ngFor="let day of grouped; trackBy: trackByDay" class="flex flex-col gap-4">
+      <div class="rounded-xl p-4 text-center" [ngClass]="day.isToday ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface'">
+        <span class="block text-xs font-bold uppercase tracking-widest" [ngClass]="day.isToday ? 'opacity-80' : 'text-outline'">
+          {{ day.isToday ? 'Today' : day.label.split(',')[0] }}
+        </span>
+        <span class="block text-lg font-headline font-bold">{{ day.label.split(',')[1] || day.label }}</span>
+        <span
+          *ngIf="day.exception"
+          class="mt-2 inline-block rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest"
+          [ngClass]="day.exception.type === 'VACATION_DAY' ? 'bg-error/15 text-error' : 'bg-secondary/15 text-secondary'"
+        >
+          {{ exceptionTypeLabel(day.exception.type) }}
+        </span>
+      </div>
+
+      <div *ngIf="day.slots.length === 0" class="flex min-h-[140px] flex-col items-center justify-center rounded-xl bg-surface-container/50 text-center opacity-50">
+        <span class="material-symbols-outlined mb-2 text-3xl">block</span>
+        <span class="text-xs font-bold uppercase tracking-widest">No Slots</span>
+      </div>
+
+      <div class="space-y-2" *ngIf="day.slots.length > 0">
+        <article
+          *ngFor="let slot of day.slots; trackBy: trackBySlot"
+          class="rounded-xl p-3 shadow-sm"
+          [ngClass]="slot.is_booked ? 'bg-surface-variant/40 opacity-70' : 'bg-surface-container-lowest'"
+        >
+          <div class="mb-2 flex items-start justify-between">
+            <span class="text-sm font-bold" [ngClass]="slot.is_booked ? 'text-on-surface-variant' : 'text-primary'">
+              {{ formatTime(slot.start_datetime) }}
+            </span>
+            <span
+              class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter"
+              [ngClass]="slot.is_booked ? 'bg-error/10 text-error' : 'bg-secondary/10 text-secondary'"
+            >
+              {{ slot.is_booked ? 'Booked' : 'Available' }}
+            </span>
+          </div>
+          <p class="text-[10px] font-label text-outline">ID: SLT-{{ slot.id }}</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>

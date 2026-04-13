@@ -72,6 +72,14 @@ export class AppointmentService {
 
   // --- Admin & Queues (used by AdminDashboard — DO NOT REMOVE) ---
 
+  getScheduledAppointments(doctorId?: number): Observable<any[]> {
+    let url = `${this.api}/appointments/?status=SCHEDULED`;
+    if (doctorId) {
+      url += `&doctor_id=${doctorId}`;
+    }
+    return this.http.get<any[]>(url);
+  }
+
   getAllAppointments(): Observable<Appointment[]> {
     return this.http.get<AppointmentRaw[]>(`${this.api}/appointments/`).pipe(
       map(raw => this.enrichList(raw))
