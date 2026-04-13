@@ -3,25 +3,14 @@
 <span class="font-['Manrope'] text-xl font-bold text-blue-900">Clinical Curator</span>
 <div class="hidden md:flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-full border-none">
 <span class="material-symbols-outlined text-slate-400 text-sm">search</span>
-<input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400" placeholder="Search system settings or users..." type="text"/>
-</div>
-<div class="hidden lg:flex items-center gap-6 ml-4">
-<a class="text-blue-800 font-bold text-sm" href="#">Administration</a>
-<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Dashboard</a>
-<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">Users &amp; Roles</a>
-<a class="text-slate-600 hover:text-primary font-medium text-sm transition-colors" href="#">System Settings</a>
+<input (input)="onSearchChange($event)" class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-400 outline-none" placeholder="Search system settings or users..." type="text"/>
 </div>
 </div>
 <div class="flex items-center gap-4">
-<button class="p-2 text-slate-500 hover:bg-blue-50 transition-colors rounded-full">
-<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<button (click)="logout()" class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-lg transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[16px]">logout</span>
+Logout
 </button>
-<button class="p-2 text-slate-500 hover:bg-blue-50 transition-colors rounded-full">
-<span class="material-symbols-outlined" data-icon="settings">settings</span>
-</button>
-<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden border border-slate-200">
-<img class="w-full h-full object-cover" data-alt="portrait of a professional healthcare administrator in a clean modern clinic setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkPp0VZApQj67WdlPSDIQwF8xo1Hu7j-jrFDGLvlBhO11UvGwDp9pVVaNDYm8hbjHGSzHFcqdWMzAh_Vv3TXJYwuZ71UcWvSMy03Igb1lJFczWPm61gvdFRDODFXY8y_nSyWJKFF6OEj5KaOgBuLwdqUKu0e0bFErw6L5KAHa0ASxICebUQbCHtomUDlagZP9v5HJmcNZFtSAXCRGt5llQ2aDpz9bXlAQ0BZHDyz6o1zlWoQsIjRrri2TbaBLFYL5Hwn0x4ipjTklP"/>
-</div>
 </div>
 </nav>
 <main class="pt-24 px-6 md:px-12 pb-12">
@@ -31,7 +20,7 @@
 <h1 class="text-4xl font-extrabold text-on-surface tracking-tight leading-none">Admin Dashboard</h1>
 <p class="text-on-surface-variant text-lg">Manage clinic performance, user access, and system configurations.</p>
 </div>
-<button class="flex items-center gap-2 bg-surface-container-lowest text-primary font-semibold px-5 py-2.5 rounded-lg shadow-sm border border-outline-variant/10 hover:bg-white transition-all">
+<button (click)="exportCSV()" class="flex items-center gap-2 bg-surface-container-lowest text-primary font-semibold px-5 py-2.5 rounded-lg shadow-sm border border-outline-variant/10 hover:bg-white transition-all">
 <span class="material-symbols-outlined text-sm">download</span>
                     Export CSV
                 </button>
@@ -53,8 +42,8 @@
 </div>
 <div class="flex items-end justify-between h-48 gap-4 px-2">
 @for (stat of appointmentsPerDay(); track stat.day) {
-<div class="flex flex-col items-center gap-3 w-full">
-<div class="w-full bg-primary/10 rounded-t-lg hover:bg-primary/20 transition-all" [style.height.%]="stat.percentage"></div>
+<div class="flex flex-col items-center justify-end gap-3 w-full h-full">
+<div class="w-full bg-blue-500 rounded-t-sm hover:bg-blue-600 transition-all shadow-sm" [style.height.%]="stat.percentage"></div>
 <span class="text-xs text-slate-400 font-medium">{{ stat.day }}</span>
 </div>
 } @empty {
@@ -89,12 +78,31 @@
 <div class="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 <h2 class="text-xl font-bold font-headline">Manage Users &amp; Roles</h2>
 <div class="flex flex-col sm:flex-row w-full md:w-auto gap-4">
-<div class="relative flex-grow min-w-[320px]">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-<input class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm rounded-full pl-10 pr-4 py-2 placeholder:text-slate-400 transition-all" placeholder="Search users by name, email or ID..." type="text"/>
+<div class="flex items-center gap-2">
+  <select (change)="onRoleChange($event)" class="bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm rounded-lg px-3 py-2 transition-all text-slate-600 outline-none">
+    <option value="">All Roles</option>
+    <option value="ADMIN">Admin</option>
+    <option value="DOCTOR">Doctor</option>
+    <option value="PATIENT">Patient</option>
+    <option value="RECEPTIONIST">Receptionist</option>
+  </select>
+
+  <select (change)="onStatusChange($event)" class="bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm rounded-lg px-3 py-2 transition-all text-slate-600 outline-none">
+    <option value="">All Statuses</option>
+    <option value="true">Active</option>
+    <option value="false">Inactive</option>
+  </select>
 </div>
-<div class="flex items-center self-end sm:self-center">
-<span class="px-4 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100">Total: 1,248 Users</span>
+<div class="relative flex-grow min-w-[240px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input (input)="onSearchChange($event)" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm rounded-full pl-10 pr-4 py-2 placeholder:text-slate-400 transition-all outline-none" placeholder="Search users by name or email..." type="text"/>
+</div>
+<div class="flex items-center gap-3 self-end sm:self-center">
+<span class="px-4 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100 whitespace-nowrap">Total: {{ totalUsers() | number }} Users</span>
+<button (click)="openCreateModal()" class="px-4 py-1.5 bg-primary text-white text-xs font-bold rounded-full shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-1 whitespace-nowrap">
+  <span class="material-symbols-outlined text-[14px]">add</span>
+  New User
+</button>
 </div>
 </div>
 </div>
@@ -109,10 +117,10 @@
 </tr>
 </thead>
 <tbody class="divide-y divide-outline-variant/5">
-@for (user of users(); track user.id) {
+@for (user of users(); track getUserId(user)) {
 <tr class="hover:bg-blue-50/30 transition-colors">
 <td class="px-6 py-4 flex items-center gap-3">
-<div class="w-8 h-8 rounded-full bg-slate-200"></div>
+<img class="w-8 h-8 rounded-full object-cover shadow-sm border border-slate-200" [src]="getUserAvatar(user)" [alt]="user.username + ' avatar'" />
 <div>
 <p class="text-sm font-semibold">{{ user.first_name || user.username || 'User' }} {{ user.last_name || '' }}</p>
 <p class="text-xs text-slate-500">{{ user.email }}</p>
@@ -127,10 +135,17 @@
 <span class="text-xs text-on-surface-variant font-medium">{{ user.is_active !== false ? 'Active' : 'Inactive' }}</span>
 </div>
 </td>
-<td class="px-6 py-4 text-right">
-<button class="p-1 rounded hover:bg-surface-container transition-colors text-slate-400 hover:text-primary">
-<span class="material-symbols-outlined text-lg">more_vert</span>
-</button>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2">
+  <button (click)="toggleUserStatus(user)" class="p-1.5 rounded hover:bg-slate-100 transition-colors" [title]="user.is_active !== false ? 'Deactivate User' : 'Activate User'">
+    <span class="material-symbols-outlined text-lg" [class.text-amber-500]="user.is_active !== false" [class.text-emerald-500]="user.is_active === false">
+      {{ user.is_active !== false ? 'block' : 'check_circle' }}
+    </span>
+  </button>
+  <button (click)="deleteUser(user)" class="p-1.5 rounded hover:bg-red-50 transition-colors text-slate-400 hover:text-red-500" title="Delete User">
+    <span class="material-symbols-outlined text-lg">delete</span>
+  </button>
+</div>
 </td>
 </tr>
 } @empty {
@@ -143,14 +158,97 @@ No users found.
 </tbody>
 </table>
 </div>
-<div class="p-4 bg-slate-50 text-center">
-<button class="text-xs font-bold text-primary hover:underline">View All Users</button>
+<div class="p-4 bg-surface-container-lowest border-t border-outline-variant/10 flex justify-between items-center rounded-b-2xl">
+  <span class="text-xs text-slate-500 font-medium">Page {{ currentPage() }}</span>
+  <div class="flex items-center gap-2">
+    <button (click)="prevPage()" [disabled]="!hasPrevPage()" class="flex items-center justify-center p-1.5 rounded-lg bg-surface-container-low text-slate-600 hover:bg-blue-50 hover:text-primary border border-outline-variant/30 disabled:opacity-40 disabled:pointer-events-none transition-all">
+      <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+    </button>
+    <button (click)="nextPage()" [disabled]="!hasNextPage()" class="flex items-center justify-center p-1.5 rounded-lg bg-surface-container-low text-slate-600 hover:bg-blue-50 hover:text-primary border border-outline-variant/30 disabled:opacity-40 disabled:pointer-events-none transition-all">
+      <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+    </button>
+  </div>
 </div>
 </div>
 </div>
 </div>
 </div>
 </main>
+
+@if (isCreateModalOpen()) {
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
+  <div class="bg-surface-container-lowest w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center">
+      <h3 class="text-xl font-bold font-headline">Create New User</h3>
+      <button (click)="closeCreateModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+    <form (ngSubmit)="createUser()" #createForm="ngForm" class="p-6 space-y-4">
+      @if (createApiErrors()._global || createApiErrors().non_field_errors) {
+        <div class="bg-red-50 text-red-600 text-sm font-medium p-3 rounded-lg flex items-center gap-2 border border-red-100">
+          <span class="material-symbols-outlined text-lg">error</span>
+          {{ createApiErrors()._global || createApiErrors().non_field_errors[0] || 'Invalid submission. Please review the errors below.' }}
+        </div>
+      }
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Username</label>
+          <input type="text" [(ngModel)]="newUserForm.username" name="username" required class="w-full bg-surface-container-low border outline-none transition-all text-sm rounded-lg px-3 py-2 focus:ring-2" [class.border-red-400]="createApiErrors().username" [class.focus:border-red-500]="createApiErrors().username" [class.focus:ring-red-500/20]="createApiErrors().username" [class.border-outline-variant\30]="!createApiErrors().username" [class.focus:border-primary]="!createApiErrors().username" [class.focus:ring-primary\20]="!createApiErrors().username">
+          @if (createApiErrors().username) {
+            <p class="text-[10px] text-red-500 font-bold mt-1">{{ createApiErrors().username[0] || createApiErrors().username }}</p>
+          }
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</label>
+          <input type="email" [(ngModel)]="newUserForm.email" name="email" required class="w-full bg-surface-container-low border outline-none transition-all text-sm rounded-lg px-3 py-2 focus:ring-2" [class.border-red-400]="createApiErrors().email" [class.focus:border-red-500]="createApiErrors().email" [class.focus:ring-red-500/20]="createApiErrors().email" [class.border-outline-variant\30]="!createApiErrors().email" [class.focus:border-primary]="!createApiErrors().email" [class.focus:ring-primary\20]="!createApiErrors().email">
+          @if (createApiErrors().email) {
+            <p class="text-[10px] text-red-500 font-bold mt-1">{{ createApiErrors().email[0] || createApiErrors().email }}</p>
+          }
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">First Name</label>
+          <input type="text" [(ngModel)]="newUserForm.first_name" name="first_name" required class="w-full bg-surface-container-low border outline-none transition-all text-sm rounded-lg px-3 py-2 focus:ring-2" [class.border-red-400]="createApiErrors().first_name" [class.focus:border-red-500]="createApiErrors().first_name" [class.focus:ring-red-500/20]="createApiErrors().first_name" [class.border-outline-variant\30]="!createApiErrors().first_name" [class.focus:border-primary]="!createApiErrors().first_name" [class.focus:ring-primary\20]="!createApiErrors().first_name">
+          @if (createApiErrors().first_name) {
+            <p class="text-[10px] text-red-500 font-bold mt-1">{{ createApiErrors().first_name[0] || createApiErrors().first_name }}</p>
+          }
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name</label>
+          <input type="text" [(ngModel)]="newUserForm.last_name" name="last_name" required class="w-full bg-surface-container-low border outline-none transition-all text-sm rounded-lg px-3 py-2 focus:ring-2" [class.border-red-400]="createApiErrors().last_name" [class.focus:border-red-500]="createApiErrors().last_name" [class.focus:ring-red-500/20]="createApiErrors().last_name" [class.border-outline-variant\30]="!createApiErrors().last_name" [class.focus:border-primary]="!createApiErrors().last_name" [class.focus:ring-primary\20]="!createApiErrors().last_name">
+          @if (createApiErrors().last_name) {
+            <p class="text-[10px] text-red-500 font-bold mt-1">{{ createApiErrors().last_name[0] || createApiErrors().last_name }}</p>
+          }
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Role</label>
+          <select [(ngModel)]="newUserForm.role" name="role" required class="w-full bg-surface-container-low border outline-none transition-all text-sm rounded-lg px-3 py-2 focus:ring-2" [class.border-red-400]="createApiErrors().role" [class.focus:border-red-500]="createApiErrors().role" [class.focus:ring-red-500/20]="createApiErrors().role" [class.border-outline-variant\30]="!createApiErrors().role" [class.focus:border-primary]="!createApiErrors().role" [class.focus:ring-primary\20]="!createApiErrors().role">
+            <option value="ADMIN">Admin</option>
+            <option value="DOCTOR">Doctor</option>
+            <option value="PATIENT">Patient</option>
+            <option value="RECEPTIONIST">Receptionist</option>
+          </select>
+          @if (createApiErrors().role) {
+            <p class="text-[10px] text-red-500 font-bold mt-1">{{ createApiErrors().role[0] || createApiErrors().role }}</p>
+          }
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+          <input type="password" [(ngModel)]="newUserForm.password" name="password" required minlength="8" class="w-full bg-surface-container-low border outline-none transition-all text-sm rounded-lg px-3 py-2 focus:ring-2" [class.border-red-400]="createApiErrors().password" [class.focus:border-red-500]="createApiErrors().password" [class.focus:ring-red-500/20]="createApiErrors().password" [class.border-outline-variant\30]="!createApiErrors().password" [class.focus:border-primary]="!createApiErrors().password" [class.focus:ring-primary\20]="!createApiErrors().password">
+          @if (createApiErrors().password) {
+            <p class="text-[10px] text-red-500 font-bold mt-1">{{ createApiErrors().password[0] || createApiErrors().password }}</p>
+          }
+        </div>
+      </div>
+      <div class="pt-4 flex justify-end gap-3 mt-4 border-t border-outline-variant/10">
+        <button type="button" (click)="closeCreateModal()" class="px-5 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+        <button type="submit" [disabled]="createForm.invalid" class="px-5 py-2 text-sm font-bold text-white bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-primary/50">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
 <footer class="max-w-7xl mx-auto px-6 md:px-12 py-8 border-t border-slate-200 mt-12 flex justify-between items-center text-slate-500 text-sm">
 <div>© 2024 Curator Health. All rights reserved.</div>
 <div class="flex gap-6">
