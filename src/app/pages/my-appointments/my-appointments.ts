@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AppointmentService } from '../../services/appointment';
@@ -26,7 +26,10 @@ export class MyAppointmentsComponent implements OnInit {
     { label: 'Cancelled', value: 'CANCELLED' },
   ];
 
-  constructor(private appointmentService: AppointmentService) {}
+  constructor(
+    private appointmentService: AppointmentService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -34,15 +37,19 @@ export class MyAppointmentsComponent implements OnInit {
 
   loadAppointments(): void {
     this.loading = true;
+    this.cdr.detectChanges();
+
     this.appointmentService.getMyAppointments().subscribe({
       next: (data) => {
         this.appointments = data;
         this.applyFilter();
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMsg = 'Failed to load appointments.';
         this.loading = false;
+        this.cdr.detectChanges();
       },
     });
   }

@@ -21,6 +21,7 @@ export class AppointmentService {
   }
 
   cacheBooking(appointmentId: number, info: {
+    doctor_id: number;
     doctor_name: string;
     doctor_specialization: string;
     start_datetime: string;
@@ -32,7 +33,7 @@ export class AppointmentService {
     localStorage.setItem('booking_cache', JSON.stringify(cache));
   }
 
-  // --- API Calls ---
+  // --- Patient API Calls ---
 
   bookAppointment(slotId: number): Observable<AppointmentRaw> {
     return this.http.post<AppointmentRaw>(
@@ -53,6 +54,8 @@ export class AppointmentService {
     );
   }
 
+  // --- Consultation ---
+
   getConsultation(appointmentId: number): Observable<Consultation> {
     return this.http.get<Consultation>(
       `${this.api}/appointments/${appointmentId}/consultation`
@@ -67,7 +70,7 @@ export class AppointmentService {
     return this.http.patch<Consultation>(`${this.api}/appointments/${appointmentId}/consultation`, data);
   }
 
-  // --- Admin & Queues ---
+  // --- Admin & Queues (used by AdminDashboard — DO NOT REMOVE) ---
 
   getAllAppointments(): Observable<Appointment[]> {
     return this.http.get<AppointmentRaw[]>(`${this.api}/appointments/`).pipe(
@@ -80,7 +83,18 @@ export class AppointmentService {
   }
 
   getAppointmentsAnalytics(): Observable<any> {
-    return this.http.get(`${this.api}/appointments`);
+    return this.http.get(`${this.api}/appointments/analytics`);
+  }
+
+  getTodayStatusAnalytics(): Observable<any> {
+    return this.http.get(`${this.api}/appointments/analytics/today-status`);
+  }
+
+  exportAnalytics(): Observable<any> {
+    return this.http.get(`${this.api}/appointments/analytics/export`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
   }
 
   // --- Status Updates ---
@@ -129,6 +143,7 @@ export class AppointmentService {
       created_at: raw.created_at,
       slot_id: raw.slot,
       patient_id: raw.patient,
+      doctor_id: cached?.doctor_id || 0,
       doctor_name: cached?.doctor_name || '',
       doctor_specialization: cached?.doctor_specialization || '',
       start_datetime: cached?.start_datetime || '',
