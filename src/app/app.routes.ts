@@ -67,6 +67,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   { path: 'receptionist', redirectTo: 'receptionist/dashboard', pathMatch: 'full' },
+  { path: 'doctor-dashboard', loadComponent: () => import('./pages/doctor-dashboard/doctor-dashboard').then(m => m.DoctorDashboardComponent), canActivate: [authGuard] },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' },
 ];

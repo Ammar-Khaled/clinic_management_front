@@ -123,31 +123,40 @@ export class DoctorDashboardComponent implements OnInit {
   private loadQueue() {
     this.appointmentService.getQueueToday().subscribe({
       next: (res: any) => {
-        const items = Array.isArray(res) ? res : res?.data || res?.queue || [];
+        // Handle the nested 'queue' array as per the API response structure
+        const items = res?.queue || (Array.isArray(res) ? res : res?.data || []);
+        
         const mapped: QueuePatient[] = items.map((item: any, idx: number) => {
-          const checkIn = item.check_in_time ? new Date(item.check_in_time) : new Date();
-          const now = new Date();
-          const waitMs = now.getTime() - checkIn.getTime();
-          const waitMin = Math.max(0, Math.round(waitMs / 60000));
-          const name = item.patient_name || item.patient?.name || `Patient ${idx + 1}`;
+          const patientId = item.patient?.id || item.patient_id || idx;
+          const name = item.patient?.name || item.patient_name || `Patient ${idx + 1}`;
           const initials = name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
+
+          // Format check-in time or fallback to scheduled start
+          let checkInTime = '—';
+          if (item.check_in_time) {
+            const date = new Date(item.check_in_time);
+            checkInTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+          } else if (item.scheduled_start_datetime) {
+            const date = new Date(item.scheduled_start_datetime);
+            checkInTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+          }
 
           let status: QueuePatient['status'] = 'CHECKED_IN';
           if (item.status === 'IN_PROGRESS' || item.status === 'IN_CONSULTATION') status = 'IN_PROGRESS';
 
           return {
-            id: item.patient_id || item.patient?.id || idx,
-            appointmentId: item.id || item.appointment_id || idx,
+            id: patientId,
+            appointmentId: item.appointment_id || item.id || idx,
             name,
             initials,
-            visitType: item.visit_type || item.reason || 'General Checkup',
-            patientCode: item.patient_code || `#PT-${String(item.patient_id || idx).padStart(4, '0')}`,
-            checkInTime: checkIn.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-            waitMinutes: waitMin,
+            visitType: item.visit_type || item.reason || 'Consultation',
+            patientCode: item.patient_code || `#PT-${String(patientId).padStart(4, '0')}`,
+            checkInTime: checkInTime,
+            waitMinutes: item.waiting_time_minutes || 0,
             status,
-            age: item.patient_age || item.patient?.age,
-            gender: item.patient_gender || item.patient?.gender,
-            allergies: item.patient_allergies || item.patient?.allergies || '',
+            age: item.patient?.age || item.patient_age,
+            gender: item.patient?.gender || item.patient_gender,
+            allergies: item.patient?.allergies || item.patient_allergies || '',
           };
         });
 
@@ -192,10 +201,11 @@ export class DoctorDashboardComponent implements OnInit {
 
   private loadAppointmentRequests(doctorId?: number) {
     this.appointmentService.getScheduledAppointments(doctorId).subscribe({
-      next: (appointments: any) => {
-        const pending = (Array.isArray(appointments) ? appointments : [])
-          .slice(0, 5);
-
+      next: (res: any) => {
+        // Use the 'appointments' array from the API response
+        const items = res?.appointments || (Array.isArray(res) ? res : []);
+        const pending = items.slice(0, 5);
+        
         const colors = [
           { bg: '#e0e7ff', text: '#3730a3' },
           { bg: '#fce7f3', text: '#9d174d' },
@@ -204,18 +214,20 @@ export class DoctorDashboardComponent implements OnInit {
         ];
 
         const mapped: AppointmentRequest[] = pending.map((a: any, i: number) => {
-          const name = a.patient_name || a.patient?.name || a.doctor_name || `Patient ${a.patient_id || a.patient?.id || i}`;
+          const name = a.patient?.name || a.patient_name || `Patient ${a.patient?.id || a.patient_id || i}`;
           const initials = name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
           const c = colors[i % colors.length];
+          
+          // Use slot.start_datetime if available, otherwise fallback to created_at
+          const displayDate = a.slot?.start_datetime || a.start_datetime || a.created_at;
+          
           return {
             id: a.id,
             name,
             initials,
-            date: a.start_datetime 
-              ? new Date(a.start_datetime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
-              : a.created_at 
-                ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
-                : '',
+            date: displayDate 
+              ? new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+              : '',
             bgColor: c.bg,
             textColor: c.text,
           };
