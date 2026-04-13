@@ -85,4 +85,24 @@ export class AdminDashboard implements OnInit {
       error: (err) => console.warn('Using fallback data. Error fetching analytics API:', err)
     });
   }
+
+  getRoleClasses(role: string | undefined): string {
+    const baseClasses = 'px-2.5 py-1 text-[10px] font-bold rounded-md uppercase';
+    const normalizedRole = role?.toLowerCase()?.trim() || '';
+    
+    switch (normalizedRole) {
+      case 'admin':
+        return `${baseClasses} bg-purple-100 text-purple-700`;
+      case 'doctor':
+        return `${baseClasses} bg-emerald-100 text-emerald-700`;
+      case 'patient':
+        return `${baseClasses} bg-blue-100 text-blue-700`;
+      case 'nurse':
+        return `${baseClasses} bg-pink-100 text-pink-700`;
+      case 'receptionist':
+        return `${baseClasses} bg-amber-100 text-amber-700`;
+      default:
+        return `${baseClasses} bg-slate-100 text-slate-700`;
+    }
+  }
 }
