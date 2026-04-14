@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { AppointmentRaw, Appointment, BookingCache, Consultation } from '../models/appointment.model';
+import {
+  AppointmentRaw,
+  Appointment,
+  AppointmentListResponse,
+  BookingCache,
+  Consultation,
+  TodayQueueResponse,
+} from '../models/appointment.model';
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
@@ -20,14 +27,17 @@ export class AppointmentService {
     }
   }
 
-  cacheBooking(appointmentId: number, info: {
-    doctor_id: number;
-    doctor_name: string;
-    doctor_specialization: string;
-    start_datetime: string;
-    end_datetime: string;
-    session_duration: number;
-  }): void {
+  cacheBooking(
+    appointmentId: number,
+    info: {
+      doctor_id: number;
+      doctor_name: string;
+      doctor_specialization: string;
+      start_datetime: string;
+      end_datetime: string;
+      session_duration: number;
+    },
+  ): void {
     const cache = this.getCache();
     cache[appointmentId] = info;
     localStorage.setItem('booking_cache', JSON.stringify(cache));
@@ -36,37 +46,56 @@ export class AppointmentService {
   // --- Patient API Calls ---
 
   bookAppointment(slotId: number): Observable<AppointmentRaw> {
-    return this.http.post<AppointmentRaw>(
-      `${this.api}/patients/appointments`,
-      { slot_id: slotId }
-    );
+    return this.http.post<AppointmentRaw>(`${this.api}/patients/appointments`, { slot_id: slotId });
   }
 
   getMyAppointments(): Observable<Appointment[]> {
-    return this.http.get<AppointmentRaw[]>(`${this.api}/patients/appointments/me`).pipe(
-      map(raw => this.enrichList(raw))
-    );
+    return this.http
+      .get<AppointmentRaw[]>(`${this.api}/patients/appointments/me`)
+      .pipe(map((raw) => this.enrichList(raw)));
   }
 
   getAppointmentDetail(id: number): Observable<Appointment> {
-    return this.http.get<AppointmentRaw>(`${this.api}/patients/appointments/${id}`).pipe(
-      map(raw => this.enrichOne(raw))
-    );
+    return this.http
+      .get<AppointmentRaw>(`${this.api}/patients/appointments/${id}`)
+      .pipe(map((raw) => this.enrichOne(raw)));
   }
 
   // --- Consultation ---
 
   getConsultation(appointmentId: number): Observable<Consultation> {
-    return this.http.get<Consultation>(
-      `${this.api}/appointments/${appointmentId}/consultation`
-    );
+    return this.http.get<Consultation>(`${this.api}/appointments/${appointmentId}/consultation`);
   }
 
   writeConsultation(appointmentId: number | string, data: any): Observable<Consultation> {
-    return this.http.post<Consultation>(`${this.api}/appointments/${appointmentId}/consultation/write`, data);
+    return this.http.post<Consultation>(
+      `${this.api}/appointments/${appointmentId}/consultation/write`,
+      data,
+    );
   }
 
   // --- Admin & Queues (used by AdminDashboard — DO NOT REMOVE) ---
+
+  listAppointments(filters?: {
+    status?: string;
+    doctorId?: number;
+    from?: string;
+    to?: string;
+    patientName?: string;
+    appointmentId?: number;
+  }): Observable<AppointmentListResponse> {
+    let params = new HttpParams();
+
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.doctorId) params = params.set('doctor_id', String(filters.doctorId));
+    if (filters?.from) params = params.set('from', filters.from);
+    if (filters?.to) params = params.set('to', filters.to);
+    if (filters?.patientName) params = params.set('patient_name', filters.patientName);
+    if (filters?.appointmentId)
+      params = params.set('appointment_id', String(filters.appointmentId));
+
+    return this.http.get<AppointmentListResponse>(`${this.api}/appointments/`, { params });
+  }
 
   getScheduledAppointments(doctorId?: number): Observable<any[]> {
     let url = `${this.api}/appointments/?status=SCHEDULED`;
@@ -77,13 +106,19 @@ export class AppointmentService {
   }
 
   getAllAppointments(): Observable<Appointment[]> {
-    return this.http.get<AppointmentRaw[]>(`${this.api}/appointments/`).pipe(
-      map(raw => this.enrichList(raw))
-    );
+    return this.http
+      .get<AppointmentRaw[]>(`${this.api}/appointments/`)
+      .pipe(map((raw) => this.enrichList(raw)));
   }
 
   getQueueToday(): Observable<any> {
     return this.http.get(`${this.api}/appointments/queue/today`);
+  }
+
+  getQueueTodayForDoctor(doctorId: number, date?: string): Observable<TodayQueueResponse> {
+    let params = new HttpParams().set('doctor_id', String(doctorId));
+    if (date) params = params.set('date', date);
+    return this.http.get<TodayQueueResponse>(`${this.api}/appointments/queue/today`, { params });
   }
 
   getAppointmentsAnalytics(): Observable<any> {
@@ -97,7 +132,7 @@ export class AppointmentService {
   exportAnalytics(): Observable<any> {
     return this.http.get(`${this.api}/appointments/analytics/export`, {
       responseType: 'blob',
-      observe: 'response'
+      observe: 'response',
     });
   }
 
@@ -128,7 +163,10 @@ export class AppointmentService {
   }
 
   rescheduleAppointment(id: number | string, newSlotId: number, reason: string): Observable<any> {
-    return this.http.patch(`${this.api}/appointments/${id}/reschedule`, { new_slot_id: newSlotId, reason });
+    return this.http.patch(`${this.api}/appointments/${id}/reschedule`, {
+      new_slot_id: newSlotId,
+      reason,
+    });
   }
 
   getRescheduleHistory(id: number | string): Observable<any> {
@@ -157,6 +195,6 @@ export class AppointmentService {
   }
 
   private enrichList(rawList: AppointmentRaw[]): Appointment[] {
-    return rawList.map(r => this.enrichOne(r));
+    return rawList.map((r) => this.enrichOne(r));
   }
 }

@@ -3,14 +3,40 @@
     <div class="flex items-center gap-8">
       <span class="font-headline text-xl font-extrabold text-primary">Clinical Curator</span>
       <div class="hidden items-center gap-6 text-sm font-semibold md:flex">
-        <a routerLink="/receptionist/dashboard" class="border-b-2 border-primary pb-1 text-primary">Dashboard</a>
-        <a routerLink="/receptionist/schedules" class="text-slate-500 transition-colors hover:text-primary">Schedules</a>
-        <a routerLink="/receptionist/slots" class="text-slate-500 transition-colors hover:text-primary">Slots</a>
+        <a routerLink="/receptionist/dashboard" class="border-b-2 border-primary pb-1 text-primary"
+          >Dashboard</a
+        >
+        <a
+          routerLink="/receptionist/schedules"
+          class="text-slate-500 transition-colors hover:text-primary"
+          >Schedules</a
+        >
+        <a
+          routerLink="/receptionist/slots"
+          class="text-slate-500 transition-colors hover:text-primary"
+          >Slots</a
+        >
       </div>
     </div>
     <div class="text-right">
-      <p class="text-xs font-bold text-primary">Reception Desk</p>
-      <p class="text-[10px] text-slate-500">Non-Clinical Access Only</p>
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-xs font-bold text-primary">{{ receptionistName() }}</p>
+          <p class="text-[10px] text-slate-500">Non-Clinical Access Only</p>
+        </div>
+        <img
+          [src]="receptionistAvatar()"
+          alt="Receptionist avatar"
+          class="h-9 w-9 rounded-full border border-slate-200 object-cover"
+        />
+        <button
+          class="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+          (click)="logout()"
+          title="Logout"
+        >
+          <span class="material-symbols-outlined text-lg">logout</span>
+        </button>
+      </div>
     </div>
   </div>
 </nav>
@@ -18,144 +44,211 @@
 <main class="mx-auto min-h-screen max-w-7xl px-6 pb-12 pt-24">
   <header class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
     <div>
-      <h1 class="mb-2 text-4xl font-headline font-extrabold tracking-tight text-on-surface">Receptionist Console</h1>
+      <h1 class="mb-2 text-4xl font-headline font-extrabold tracking-tight text-on-surface">
+        Receptionist Console
+      </h1>
       <p class="text-on-surface-variant/80">Schedule Management and Patient Flow</p>
     </div>
 
-    <div class="flex flex-wrap items-center gap-3">
-      <select
-        class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold"
-        [(ngModel)]="selectedDoctorId"
-        (ngModelChange)="refreshDoctorPanels()"
-      >
-        <option [ngValue]="null">Select doctor</option>
-        <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
-          Doctor #{{ doctor.id }} - {{ doctor.specialization }}
-        </option>
-      </select>
-
-      <button
-        class="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-container px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
-        [disabled]="regenerating"
-        (click)="regenerateAllDoctorsSlots()"
-      >
-        <span class="material-symbols-outlined text-base">autorenew</span>
-        {{ regenerating ? 'Regenerating...' : 'Regenerate Next 7 Days' }}
-      </button>
+    <div class="rounded-xl border border-outline-variant/30 bg-surface-container-low px-4 py-2">
+      <div class="flex flex-col">
+        <span class="mb-1 text-[10px] font-bold uppercase leading-none text-slate-400"
+          >Current Date</span
+        >
+        <span class="text-sm font-semibold text-primary">{{ selectedDate }}</span>
+      </div>
     </div>
   </header>
 
-  <div *ngIf="statusMessage" class="mb-4 rounded-xl bg-secondary-container/40 px-4 py-3 text-sm text-on-secondary-container">
-    {{ statusMessage }}
+  <div
+    *ngIf="successMessage"
+    class="mb-4 rounded-xl bg-secondary-container/40 px-4 py-3 text-sm text-on-secondary-container"
+  >
+    {{ successMessage }}
   </div>
-  <div *ngIf="errorMessage" class="mb-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">
+  <div
+    *ngIf="errorMessage"
+    class="mb-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container"
+  >
     {{ errorMessage }}
   </div>
 
+  <section
+    class="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+  >
+    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Doctor</span>
+      <select
+        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        [(ngModel)]="selectedDoctorId"
+        (ngModelChange)="onFiltersChanged()"
+      >
+        <option [ngValue]="null">All Physicians</option>
+        <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
+          {{ doctorDisplayName(doctor) }}
+        </option>
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Appt Status</span>
+      <select
+        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        [(ngModel)]="selectedStatus"
+        (ngModelChange)="onFiltersChanged()"
+      >
+        <option *ngFor="let status of statusOptions" [ngValue]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date Range</span>
+      <input
+        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        type="date"
+        [(ngModel)]="selectedDate"
+        (ngModelChange)="onFiltersChanged()"
+      />
+    </div>
+
+    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Appointment</span>
+      <select
+        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        [(ngModel)]="selectedAppointmentFilterId"
+        (ngModelChange)="onAppointmentFilterChanged()"
+      >
+        <option [ngValue]="null">All Appointments</option>
+        <option *ngFor="let appointment of appointmentFilterOptions" [ngValue]="appointment.id">
+          #APT-{{ appointment.id }} • {{ appointment.patient.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="relative w-full md:ml-auto md:w-64">
+      <input
+        class="w-full rounded-lg border border-slate-100 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/10"
+        placeholder="Patient name or App ID..."
+        type="text"
+        [(ngModel)]="searchText"
+        (keyup.enter)="loadAppointments()"
+      />
+      <span class="material-symbols-outlined absolute left-3 top-2 text-lg text-slate-400"
+        >person_search</span
+      >
+    </div>
+
+    <button
+      class="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white"
+      (click)="loadAppointments()"
+    >
+      Apply
+    </button>
+  </section>
+
   <section class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-    <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-      <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Selected Doctor</p>
-      <p class="mt-2 text-lg font-bold text-primary">
-        {{ selectedDoctor ? ('Doctor #' + selectedDoctor.id) : 'Not selected' }}
-      </p>
-      <p class="text-xs text-slate-500">{{ selectedDoctor?.specialization || 'Choose a physician' }}</p>
-    </article>
-
-    <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-      <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Slots (7 Days)</p>
-      <p class="mt-2 text-2xl font-extrabold text-primary">{{ totalSlots }}</p>
-      <p class="text-xs text-slate-500">{{ today }} to {{ endDate }}</p>
-    </article>
-
-    <article class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-      <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Booking Snapshot</p>
-      <p class="mt-2 text-sm font-semibold text-green-700">Available: {{ availableSlots }}</p>
-      <p class="text-sm font-semibold text-rose-700">Booked: {{ bookedSlots }}</p>
-    </article>
+    <app-stat-card
+      title="Selected Doctor"
+      [value]="selectedDoctor ? doctorDisplayName(selectedDoctor) : 'All Physicians'"
+      [subtitle]="selectedDoctor?.specialization || 'Multi doctor view'"
+      valueClass="text-primary"
+    ></app-stat-card>
+    <app-stat-card
+      title="Daily Appointments"
+      [value]="totalAppointments.toString()"
+      [subtitle]="selectedDate"
+      valueClass="text-on-surface"
+    ></app-stat-card>
+    <app-stat-card
+      title="Flow Snapshot"
+      [value]="checkedInAppointments.toString()"
+      [subtitle]="confirmedAppointments + ' confirmed currently'"
+      valueClass="text-green-700"
+    ></app-stat-card>
   </section>
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-    <section class="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm lg:col-span-8">
-      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-        <div>
-          <h2 class="text-xl font-bold text-on-surface">Slots Preview</h2>
-          <p class="text-xs text-slate-500">Administrative view for selected doctor</p>
-        </div>
-        <button class="text-xs font-bold text-primary" (click)="refreshDoctorPanels()">Refresh</button>
-      </div>
-
-      <div *ngIf="loadingSlots || loadingDoctors" class="flex items-center justify-center py-10 text-slate-500">
-        <span class="material-symbols-outlined mr-2 animate-spin">progress_activity</span>
-        Loading slots...
-      </div>
-
-      <div *ngIf="!loadingSlots && visibleSlots.length === 0" class="px-6 py-10 text-center text-sm text-slate-500">
-        No slots available for this doctor/date range.
-      </div>
-
-      <div class="overflow-x-auto" *ngIf="!loadingSlots && visibleSlots.length > 0">
-        <table class="w-full min-w-[640px] border-collapse text-left">
-          <thead>
-            <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              <th class="px-6 py-3">Date</th>
-              <th class="px-6 py-3">Time</th>
-              <th class="px-6 py-3">Slot ID</th>
-              <th class="px-6 py-3">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 text-sm">
-            <tr *ngFor="let slot of visibleSlots; trackBy: trackBySlotId">
-              <td class="px-6 py-4">{{ formatSlotDate(slot.start_datetime) }}</td>
-              <td class="px-6 py-4">{{ formatSlotTime(slot.start_datetime) }}</td>
-              <td class="px-6 py-4">#SLT-{{ slot.id }}</td>
-              <td class="px-6 py-4">
-                <span
-                  class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
-                  [ngClass]="slot.is_booked ? 'bg-error-container text-error' : 'bg-secondary-container text-on-secondary-container'"
-                >
-                  {{ slot.is_booked ? 'Booked' : 'Available' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+    <app-daily-appointments-table
+      class="lg:col-span-8"
+      [appointments]="appointments"
+      [loading]="loadingAppointments || loadingDoctors"
+      (confirm)="confirmAppointment($event)"
+      (checkIn)="checkInAppointment($event)"
+      (noShow)="noShowAppointment($event)"
+      (cancel)="cancelAppointment($event)"
+      (startReschedule)="prepareReschedule($event)"
+    ></app-daily-appointments-table>
 
     <aside class="space-y-6 lg:col-span-4">
-      <section class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-        <div class="mb-3 flex items-center justify-between">
-          <h3 class="text-sm font-bold uppercase tracking-widest text-slate-500">Weekly Availability</h3>
-          <a routerLink="/receptionist/schedules" class="text-xs font-bold text-primary">Edit</a>
+      <app-check-in-card
+        [appointments]="checkInCandidates"
+        [checkedInQueue]="checkedInQueue"
+        [loadingQueue]="loadingQueue"
+        [busy]="checkInBusy"
+        (checkIn)="checkInAppointment($event)"
+      ></app-check-in-card>
+
+      <app-reschedule-card
+        [doctors]="doctors"
+        [slots]="rescheduleSlots"
+        [loadingSlots]="loadingRescheduleSlots"
+        [busy]="actionBusy"
+        [auditMessage]="auditTrailMessage"
+        [reschedulableAppointments]="reschedulableAppointments"
+        [preselectedAppointmentId]="focusAppointmentForReschedule"
+        [preselectedDoctorId]="focusRescheduleDoctorId"
+        [preselectedDate]="focusRescheduleDate"
+        (requestSlots)="requestRescheduleSlots($event)"
+        (submit)="submitReschedule($event)"
+      ></app-reschedule-card>
+
+      <div class="rounded-[2rem] border border-slate-100 bg-white p-6 editorial-shadow">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface">
+            Doctor Schedules
+          </h3>
+          <a routerLink="/receptionist/schedules" class="text-xs font-bold text-primary"
+            >Edit Rules</a
+          >
         </div>
 
         <div *ngIf="loadingAvailability" class="py-6 text-center text-sm text-slate-500">
-          Loading availability...
+          Loading schedules...
+        </div>
+        <div
+          *ngIf="!loadingAvailability && availability.length === 0"
+          class="py-6 text-center text-sm text-slate-500"
+        >
+          No schedules for selected doctor.
         </div>
 
-        <div *ngIf="!loadingAvailability && availability.length === 0" class="py-6 text-center text-sm text-slate-500">
-          No weekly availability configured.
-        </div>
-
-        <div class="space-y-2" *ngIf="!loadingAvailability && availability.length > 0">
+        <div class="space-y-3" *ngIf="!loadingAvailability && availability.length > 0">
           <div
             *ngFor="let item of availability; trackBy: trackByAvailabilityId"
-            class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2"
+            class="rounded-xl border-l-4 border-primary bg-slate-50 p-3"
           >
-            <p class="text-xs font-bold text-on-surface">{{ dayLabel(item.day_of_week) }}</p>
-            <p class="text-[11px] text-slate-500">{{ item.start_time }} - {{ item.end_time }}</p>
+            <div class="mb-1 flex items-center justify-between">
+              <span class="text-xs font-bold">{{ dayLabel(item.day_of_week) }}</span>
+              <span
+                class="rounded bg-green-50 px-2 py-0.5 text-[9px] font-bold uppercase text-green-600"
+                >Active</span
+              >
+            </div>
+            <p class="text-[10px] font-medium text-slate-500">
+              {{ item.start_time }} - {{ item.end_time }}
+            </p>
           </div>
         </div>
-      </section>
 
-      <section class="rounded-3xl border border-slate-100 bg-slate-50 p-6">
-        <h3 class="mb-2 text-lg font-bold text-on-surface">Quick Actions</h3>
-        <p class="mb-4 text-sm text-slate-500">Open dedicated pages for deeper operations.</p>
-        <div class="grid grid-cols-1 gap-2">
-          <a routerLink="/receptionist/schedules" class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-primary">Manage Schedules & Exceptions</a>
-          <a routerLink="/receptionist/slots" class="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-primary">Manage Slots</a>
-        </div>
-      </section>
+        <a
+          routerLink="/receptionist/slots"
+          class="mt-6 block w-full rounded-xl bg-primary py-3 text-center text-xs font-bold text-white transition-all hover:shadow-lg"
+        >
+          Book Appointment
+        </a>
+      </div>
     </aside>
   </div>
 </main>
