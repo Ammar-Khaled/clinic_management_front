@@ -9,6 +9,55 @@ export interface AppointmentRaw {
   patient: number;
 }
 
+export interface AppointmentListItem {
+  id: number;
+  status: string;
+  check_in_time: string | null;
+  created_at: string;
+  slot: {
+    id: number;
+    start_datetime: string;
+    end_datetime: string;
+    doctor_id: number;
+  } | null;
+  doctor: {
+    id: number;
+    user_id: number;
+    name: string;
+  } | null;
+  patient: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface AppointmentListResponse {
+  status: string;
+  count: number;
+  appointments: AppointmentListItem[];
+}
+
+export interface TodayQueueResponse {
+  status: string;
+  doctor_id: number;
+  date: string;
+  count: number;
+  queue: Array<{
+    appointment_id: number;
+    status: string;
+    check_in_time: string | null;
+    waiting_time_minutes: number | null;
+    scheduled_start_datetime: string;
+    scheduled_end_datetime: string;
+    patient: {
+      id: number;
+      name: string;
+      email: string;
+    };
+  }>;
+}
+
 export interface Appointment {
   id: number;
   status: string;
