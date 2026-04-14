@@ -83,7 +83,15 @@ export class DashboardComponent implements OnInit {
       },
     });
   }
+private parseEgyptDate(dateStr: string): Date {
+  if (!dateStr) return new Date();
 
+  return new Date(
+    dateStr
+      .replace('Z', '')   // remove UTC shift
+      .replace(' ', 'T')  // fix Django format
+  );
+}
   // ==================== DOCTORS & BOOKING ====================
 
   loadDoctors(): void {
@@ -380,31 +388,42 @@ export class DashboardComponent implements OnInit {
     return map[status] || 'bg-slate-100 text-slate-400';
   }
 
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
+formatDate(dateStr: string): string {
+  if (!dateStr) return '—';
 
-  formatTime(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  const d = this.parseEgyptDate(dateStr);
 
-  formatSlotTime(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  }
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+formatTime(dateStr: string): string {
+  if (!dateStr) return '';
+
+  const d = new Date(dateStr.replace(' ', 'T')); 
+
+  return d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+formatSlotTime(dateStr: string): string {
+  if (!dateStr) return '';
+
+  const fixed = dateStr.replace('Z', '');
+
+  const d = new Date(fixed);
+
+  return d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
 
   private toDateStr(d: Date): string {
     return d.toISOString().split('T')[0];

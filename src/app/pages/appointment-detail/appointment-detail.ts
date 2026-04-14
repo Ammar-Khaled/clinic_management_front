@@ -186,7 +186,15 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
       },
     });
   }
+private parseEgyptDate(dateStr: string): Date {
+  if (!dateStr) return new Date();
 
+  return new Date(
+    dateStr
+      .replace('Z', '')   // remove UTC shift
+      .replace(' ', 'T')  // fix Django format
+  );
+}
   loadRescheduleHistory(appointmentId: number): void {
     this.historyLoading = true;
     this.appointmentService.getRescheduleHistory(appointmentId).subscribe({
@@ -226,7 +234,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     }
 
     const now = new Date().getTime();
-    const slotStart = new Date(this.appointment.start_datetime).getTime();
+    const slotStart = this.parseEgyptDate(this.appointment.start_datetime).getTime();
     const diff = slotStart - now;
 
     if (diff > 0) {
@@ -505,40 +513,52 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     };
     return map[status] || 'help';
   }
+formatDate(dateStr: string): string {
+  if (!dateStr) return '—';
 
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
+  const d = this.parseEgyptDate(dateStr);
 
-  formatShortDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
-  formatTime(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+formatShortDate(dateStr: string): string {
+  if (!dateStr) return '—';
 
-  formatSlotTime(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  }
+  const d = this.parseEgyptDate(dateStr);
+
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+formatTime(dateStr: string): string {
+  if (!dateStr) return '';
+
+  const d = this.parseEgyptDate(dateStr);
+
+  return d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+formatSlotTime(dateStr: string): string {
+  if (!dateStr) return '';
+
+  const d = this.parseEgyptDate(dateStr);
+
+  return d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
 }

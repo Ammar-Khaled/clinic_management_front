@@ -64,7 +64,15 @@ export class MyAppointmentsComponent implements OnInit {
     this.activeFilter = value;
     this.applyFilter();
   }
+private parseEgyptDate(dateStr: string): Date {
+  if (!dateStr) return new Date();
 
+  return new Date(
+    dateStr
+      .replace('Z', '')   // remove UTC shift
+      .replace(' ', 'T')  // fix Django format
+  );
+}
   applyFilter(): void {
     if (this.activeFilter === 'ALL') {
       this.filteredAppointments = this.appointments;
@@ -167,20 +175,28 @@ export class MyAppointmentsComponent implements OnInit {
     return icons[status] || 'help';
   }
 
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
+formatDate(dateStr: string): string {
+  if (!dateStr) return '—';
 
-  formatTime(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  const d = this.parseEgyptDate(dateStr);
+
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+formatTime(dateStr: string): string {
+  if (!dateStr) return '';
+
+  const d = this.parseEgyptDate(dateStr);
+
+  return d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
 }
