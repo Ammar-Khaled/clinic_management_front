@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -91,6 +91,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     private receptionistService: ReceptionistService,
     private appointmentService: AppointmentService,
     private authService: AuthService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -107,12 +108,14 @@ export class ReceptionistDashboardComponent implements OnInit {
         this.doctors = res.doctors;
         this.selectedDoctorId = this.doctors.length > 0 ? this.doctors[0].id : null;
         this.loadingDoctors = false;
+        this.cdr.detectChanges();
         this.loadDoctorAvailability();
         this.loadCheckedInQueue();
       },
       error: () => {
         this.loadingDoctors = false;
         this.errorMessage = 'Failed to load doctors.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -156,10 +159,12 @@ export class ReceptionistDashboardComponent implements OnInit {
         next: (res) => {
           this.appointments = res.appointments.filter((item) => item.slot !== null);
           this.loadingAppointments = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loadingAppointments = false;
           this.errorMessage = 'Failed to load appointments.';
+          this.cdr.detectChanges();
         },
       });
   }
@@ -183,9 +188,11 @@ export class ReceptionistDashboardComponent implements OnInit {
           ) {
             this.selectedAppointmentFilterId = null;
           }
+          this.cdr.detectChanges();
         },
         error: () => {
           this.appointmentFilterOptions = [];
+          this.cdr.detectChanges();
         },
       });
   }
@@ -204,10 +211,12 @@ export class ReceptionistDashboardComponent implements OnInit {
           (a, b) => Number(a.day_of_week) - Number(b.day_of_week),
         );
         this.loadingAvailability = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingAvailability = false;
         this.errorMessage = 'Failed to load doctor availability.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -221,12 +230,14 @@ export class ReceptionistDashboardComponent implements OnInit {
       next: () => {
         this.actionBusy = false;
         this.successMessage = `Appointment #${appointmentId} confirmed.`;
+        this.cdr.detectChanges();
         this.loadAppointments();
         this.loadCheckedInQueue();
       },
       error: () => {
         this.actionBusy = false;
         this.errorMessage = `Failed to confirm appointment #${appointmentId}.`;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -240,12 +251,14 @@ export class ReceptionistDashboardComponent implements OnInit {
       next: () => {
         this.checkInBusy = false;
         this.successMessage = `Patient checked in for appointment #${appointmentId}.`;
+        this.cdr.detectChanges();
         this.loadAppointments();
         this.loadCheckedInQueue();
       },
       error: () => {
         this.checkInBusy = false;
         this.errorMessage = `Failed to check in appointment #${appointmentId}.`;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -259,12 +272,14 @@ export class ReceptionistDashboardComponent implements OnInit {
       next: () => {
         this.actionBusy = false;
         this.successMessage = `Appointment #${appointmentId} marked as no-show.`;
+        this.cdr.detectChanges();
         this.loadAppointments();
         this.loadCheckedInQueue();
       },
       error: () => {
         this.actionBusy = false;
         this.errorMessage = `Failed to mark appointment #${appointmentId} as no-show.`;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -283,12 +298,14 @@ export class ReceptionistDashboardComponent implements OnInit {
       next: () => {
         this.actionBusy = false;
         this.successMessage = `Appointment #${appointmentId} cancelled.`;
+        this.cdr.detectChanges();
         this.loadAppointments();
         this.loadCheckedInQueue();
       },
       error: () => {
         this.actionBusy = false;
         this.errorMessage = `Failed to cancel appointment #${appointmentId}.`;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -301,10 +318,12 @@ export class ReceptionistDashboardComponent implements OnInit {
       next: (res) => {
         this.rescheduleSlots = res.slots.filter((slot) => !slot.is_booked);
         this.loadingRescheduleSlots = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingRescheduleSlots = false;
         this.errorMessage = 'Failed to load available slots for reschedule.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -326,12 +345,14 @@ export class ReceptionistDashboardComponent implements OnInit {
           this.auditTrailMessage = this.buildAuditMessage(oldAppointment, newSlot, payload.reason);
           this.successMessage = `Appointment #${payload.appointmentId} moved successfully.`;
           this.actionBusy = false;
+          this.cdr.detectChanges();
           this.loadAppointments();
           this.loadCheckedInQueue();
         },
         error: () => {
           this.actionBusy = false;
           this.errorMessage = `Failed to reschedule appointment #${payload.appointmentId}.`;
+          this.cdr.detectChanges();
         },
       });
   }
@@ -366,10 +387,12 @@ export class ReceptionistDashboardComponent implements OnInit {
         next: (res) => {
           this.checkedInQueue = res.queue;
           this.loadingQueue = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.checkedInQueue = [];
           this.loadingQueue = false;
+          this.cdr.detectChanges();
         },
       });
   }
