@@ -4,17 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DoctorService } from '../../services/doctor';
 import { AppointmentService } from '../../services/appointment';
+import { PatientService } from '../../services/patient';
+import { PatientProfile } from '../../models/user.model';
 
 export interface QueuePatient {
   id: number;
   appointmentId: number;
+  patientId: number;
   name: string;
   initials: string;
   visitType: string;
   patientCode: string;
+  scheduledTime: string;
   checkInTime: string;
   waitMinutes: number;
-  status: 'IN_PROGRESS' | 'CHECKED_IN' | 'WAITING';
+  status: 'SCHEDULED' | 'CONFIRMED' | 'CHECKED_IN' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW' | 'IN_CONSULTATION';
   age?: number;
   gender?: string;
   allergies?: string;
@@ -45,12 +49,14 @@ export interface AppointmentRequest {
 export class DoctorDashboardComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private appointmentService = inject(AppointmentService);
+  private patientService = inject(PatientService);
   private router = inject(Router);
 
   // --- Doctor profile ---
-  doctorName = signal('Dr. Alistair Vance');
-  doctorSpecialization = signal('Senior Cardiologist');
+  doctorName = signal('');
+  doctorSpecialization = signal('');
   docId = signal<number | null>(null);
+  loading = false;
 
   // --- Today's date ---
   todayDate = signal('');
@@ -59,6 +65,8 @@ export class DoctorDashboardComponent implements OnInit {
   // --- Queue ---
   queue = signal<QueuePatient[]>([]);
   selectedPatient = signal<QueuePatient | null>(null);
+  selectedPatientProfile = signal<PatientProfile | null>(null);
+  profileLoading = signal(false);
 
   // --- Consultation form ---
   diagnosis = signal('');
@@ -66,17 +74,48 @@ export class DoctorDashboardComponent implements OnInit {
   prescriptions = signal<PrescriptionRow[]>([]);
   diagnosticTests = signal<string[]>([]);
   newTestInput = signal('');
+  showTestDropdown = signal(false);
+
+  availableTestTypes = [
+    { code: 'CBC', name: 'Complete Blood Count' },
+    { code: 'BMP', name: 'Basic Metabolic Panel' },
+    { code: 'LFT', name: 'Liver Function Test' },
+    { code: 'LIPID', name: 'Lipid Panel' },
+    { code: 'TSH', name: 'Thyroid Stimulating Hormone' },
+    { code: 'HBA1C', name: 'HbA1c' },
+    { code: 'URINE', name: 'Urinalysis' },
+    { code: 'XRAY', name: 'X-Ray' },
+    { code: 'ECG', name: 'Electrocardiogram' },
+    { code: 'ECHO', name: 'Echocardiogram' },
+    { code: 'MRI', name: 'MRI Scan' },
+    { code: 'CT', name: 'CT Scan' },
+    { code: 'ULTRASOUND', name: 'Ultrasound' },
+  ];
+
+  filteredTests = computed(() => {
+    const input = this.newTestInput().toLowerCase().trim();
+    if (!input) return this.availableTestTypes;
+    return this.availableTestTypes.filter(t =>
+      t.code.toLowerCase().includes(input) ||
+      t.name.toLowerCase().includes(input)
+    );
+  });
 
   // --- Appointment Requests ---
   appointmentRequests = signal<AppointmentRequest[]>([]);
 
   // --- Search ---
-  searchQuery = signal('');
+  successMessage = signal<string | null>(null);
 
   ngOnInit() {
     this.setTodayDate();
     this.loadDoctorProfile();
     this.loadQueue();
+  }
+
+  private showSuccess(msg: string) {
+    this.successMessage.set(msg);
+    setTimeout(() => this.successMessage.set(null), 3000);
   }
 
   private setTodayDate() {
@@ -100,60 +139,65 @@ export class DoctorDashboardComponent implements OnInit {
   private loadDoctorProfile() {
     this.doctorService.getDoctorProfileSelf().subscribe({
       next: (res: any) => {
-        const doctor = res.doctor || res; // Handle both nested and flat responses
-        if (doctor) {
-          this.docId.set(doctor.id);
-          const name = doctor.user?.first_name && doctor.user?.last_name
-            ? `Dr. ${doctor.user.first_name} ${doctor.user.last_name}`
-            : doctor.user?.username ? `Dr. ${doctor.user.username}` : 'Dr.';
-          this.doctorName.set(name);
-          this.doctorSpecialization.set(doctor.specialization || 'Specialist');
-          
+        const d = res.doctor;
+        if (d) {
+          this.docId.set(d.id);
+          const fullName = d.first_name && d.last_name 
+            ? `Dr. ${d.first_name} ${d.last_name}` 
+            : `Dr. ${d.username || 'Specialist'}`;
+          this.doctorName.set(fullName);
+          this.doctorSpecialization.set(d.specialization || 'Specialist');
+
           // Load appointments for this specific doctor
-          this.loadAppointmentRequests(doctor.id);
+          this.loadAppointmentRequests(d.id);
         }
       },
-      error: () => {
-        // Fallback for demo
-        this.loadAppointmentRequests();
-      },
+      error: () => { },
     });
   }
 
-  private loadQueue() {
+  private loadQueue(preserveSelection = false) {
+    const currentSelectedId = this.selectedPatient()?.appointmentId;
+
     this.appointmentService.getQueueToday().subscribe({
       next: (res: any) => {
         // Handle the nested 'queue' array as per the API response structure
         const items = res?.queue || (Array.isArray(res) ? res : res?.data || []);
-        
+
         const mapped: QueuePatient[] = items.map((item: any, idx: number) => {
           const patientId = item.patient?.id || item.patient_id || idx;
           const name = item.patient?.name || item.patient_name || `Patient ${idx + 1}`;
           const initials = name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
 
-          // Format check-in time or fallback to scheduled start
+          // Format scheduled range: "HH:mm - HH:mm"
+          let scheduledTime = '—';
+          if (item.scheduled_start_datetime && item.scheduled_end_datetime) {
+            const start = new Date(item.scheduled_start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const end = new Date(item.scheduled_end_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            scheduledTime = `${start} - ${end}`;
+          }
+
+          // Actual check-in time for checked-in patients
           let checkInTime = '—';
           if (item.check_in_time) {
             const date = new Date(item.check_in_time);
             checkInTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-          } else if (item.scheduled_start_datetime) {
-            const date = new Date(item.scheduled_start_datetime);
-            checkInTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
           }
 
-          let status: QueuePatient['status'] = 'CHECKED_IN';
-          if (item.status === 'IN_PROGRESS' || item.status === 'IN_CONSULTATION') status = 'IN_PROGRESS';
+          const status = item.status || 'WAITING';
 
           return {
             id: patientId,
             appointmentId: item.appointment_id || item.id || idx,
+            patientId: patientId,
             name,
             initials,
             visitType: item.visit_type || item.reason || 'Consultation',
             patientCode: item.patient_code || `#PT-${String(patientId).padStart(4, '0')}`,
-            checkInTime: checkInTime,
+            scheduledTime,
+            checkInTime,
             waitMinutes: item.waiting_time_minutes || 0,
-            status,
+            status: status as any,
             age: item.patient?.age || item.patient_age,
             gender: item.patient?.gender || item.patient_gender,
             allergies: item.patient?.allergies || item.patient_allergies || '',
@@ -162,42 +206,26 @@ export class DoctorDashboardComponent implements OnInit {
 
         this.queue.set(mapped);
         this.activeCount.set(mapped.length);
-        if (mapped.length > 0 && !this.selectedPatient()) {
-          this.selectPatient(mapped[0]);
+
+        if (mapped.length > 0) {
+          if (preserveSelection && currentSelectedId) {
+            const stillExists = mapped.find(p => p.appointmentId === currentSelectedId);
+            if (stillExists) {
+              this.selectedPatient.set(stillExists);
+            } else {
+              this.selectPatient(mapped[0]);
+            }
+          } else if (!this.selectedPatient()) {
+            this.selectPatient(mapped[0]);
+          }
+        } else {
+          this.selectedPatient.set(null);
         }
       },
-      error: () => {
-        // Fallback demo data
-        this.loadFallbackQueue();
-      },
+      error: () => { },
     });
   }
 
-  private loadFallbackQueue() {
-    const demo: QueuePatient[] = [
-      {
-        id: 1, appointmentId: 101, name: 'Eleanor Fitzwilliam', initials: 'EF',
-        visitType: 'General Checkup', patientCode: '#PT-8821',
-        checkInTime: '09:15', waitMinutes: 45, status: 'IN_PROGRESS',
-        age: 72, gender: 'Female', allergies: 'Penicillin Allergy',
-      },
-      {
-        id: 2, appointmentId: 102, name: 'Arthur Pendragon', initials: 'AP',
-        visitType: 'Post-Op Review', patientCode: '#PT-9012',
-        checkInTime: '09:35', waitMinutes: 25, status: 'CHECKED_IN',
-        age: 45, gender: 'Male', allergies: '',
-      },
-      {
-        id: 3, appointmentId: 103, name: 'Sarah Connor', initials: 'SC',
-        visitType: 'Blood Lab Review', patientCode: '#PT-4423',
-        checkInTime: '09:48', waitMinutes: 12, status: 'CHECKED_IN',
-        age: 38, gender: 'Female', allergies: '',
-      },
-    ];
-    this.queue.set(demo);
-    this.activeCount.set(demo.length);
-    this.selectPatient(demo[0]);
-  }
 
   private loadAppointmentRequests(doctorId?: number) {
     this.appointmentService.getScheduledAppointments(doctorId).subscribe({
@@ -205,7 +233,7 @@ export class DoctorDashboardComponent implements OnInit {
         // Use the 'appointments' array from the API response
         const items = res?.appointments || (Array.isArray(res) ? res : []);
         const pending = items.slice(0, 5);
-        
+
         const colors = [
           { bg: '#e0e7ff', text: '#3730a3' },
           { bg: '#fce7f3', text: '#9d174d' },
@@ -217,16 +245,16 @@ export class DoctorDashboardComponent implements OnInit {
           const name = a.patient?.name || a.patient_name || `Patient ${a.patient?.id || a.patient_id || i}`;
           const initials = name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
           const c = colors[i % colors.length];
-          
+
           // Use slot.start_datetime if available, otherwise fallback to created_at
           const displayDate = a.slot?.start_datetime || a.start_datetime || a.created_at;
-          
+
           return {
             id: a.id,
             name,
             initials,
-            date: displayDate 
-              ? new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) 
+            date: displayDate
+              ? new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
               : '',
             bgColor: c.bg,
             textColor: c.text,
@@ -234,12 +262,7 @@ export class DoctorDashboardComponent implements OnInit {
         });
         this.appointmentRequests.set(mapped);
       },
-      error: () => {
-        this.appointmentRequests.set([
-          { id: 1, name: 'James Wilson', initials: 'JW', date: 'Oct 26, 14:00', bgColor: '#e0e7ff', textColor: '#3730a3' },
-          { id: 2, name: 'Martha Raye', initials: 'MR', date: 'Oct 27, 09:30', bgColor: '#fce7f3', textColor: '#9d174d' },
-        ]);
-      },
+      error: () => { },
     });
   }
 
@@ -247,42 +270,54 @@ export class DoctorDashboardComponent implements OnInit {
 
   selectPatient(patient: QueuePatient) {
     this.selectedPatient.set(patient);
+    this.selectedPatientProfile.set(null);
     this.diagnosis.set('');
     this.clinicalNotes.set('');
     this.diagnosticTests.set([]);
     this.prescriptions.set([]);
 
-    // Try to load existing consultation
-    if (patient.appointmentId) {
-      this.appointmentService.getConsultation(patient.appointmentId).subscribe({
-        next: (c: any) => {
-          if (c) {
-            this.diagnosis.set(c.diagnosis || '');
-            this.clinicalNotes.set(c.notes || '');
-            this.diagnosticTests.set(c.tests || []);
-            if (c.prescriptions && c.prescriptions.length) {
-              this.prescriptions.set(c.prescriptions.map((p: any) => ({
-                drugName: p.drug_name || '',
-                dosage: p.dose || '',
-                duration: p.duration || '',
-              })));
-            }
+    if (patient.patientId) {
+      this.profileLoading.set(true);
+      this.patientService.getPatientById(patient.patientId).subscribe({
+        next: (res: any) => {
+          const p = res.patient;
+          if (p) {
+            this.selectedPatientProfile.set(p);
           }
+          this.profileLoading.set(false);
         },
-        error: () => {},
+        error: () => {
+          this.profileLoading.set(false);
+        }
       });
+    }
+  }
+
+  calculateAge(dobString?: string): string {
+    if (!dobString) return '';
+    try {
+      const dob = new Date(dobString);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      return `${age} Years`;
+    } catch {
+      return '';
     }
   }
 
   startVisit(patient: QueuePatient) {
     this.appointmentService.checkInAppointment(patient.appointmentId).subscribe({
       next: () => {
-        patient.status = 'IN_PROGRESS';
+        patient.status = 'CHECKED_IN';
         this.selectPatient(patient);
         this.queue.update(q => [...q]);
       },
       error: () => {
-        patient.status = 'IN_PROGRESS';
+        patient.status = 'CHECKED_IN';
         this.selectPatient(patient);
         this.queue.update(q => [...q]);
       },
@@ -292,22 +327,38 @@ export class DoctorDashboardComponent implements OnInit {
   markNoShow(patient?: QueuePatient) {
     const target = patient || this.selectedPatient();
     if (!target) return;
+
+    if (!confirm(`Are you sure you want to mark ${target.name} as a no-show?`)) return;
+
+    this.loading = true;
     this.appointmentService.noShowAppointment(target.appointmentId).subscribe({
       next: () => {
-        this.queue.update(q => q.filter(p => p.id !== target.id));
+        this.loading = false;
+        this.showSuccess(`${target.name} marked as No-Show`);
         if (this.selectedPatient()?.id === target.id) {
-          const remaining = this.queue();
-          this.selectedPatient.set(remaining.length > 0 ? remaining[0] : null);
+          this.clearForm();
         }
-        this.activeCount.update(c => Math.max(0, c - 1));
+        this.loadQueue(); // Refresh
       },
-      error: () => {},
+      error: (err: any) => {
+        this.loading = false;
+        console.error('Failed to mark no-show:', err);
+        alert('Action failed. Please try again.');
+        this.loadQueue();
+      },
     });
   }
 
   completeConsultation() {
     const patient = this.selectedPatient();
-    if (!patient) return;
+    if (!patient || !patient.appointmentId) return;
+
+    if (!this.diagnosis().trim()) {
+      alert('Please enter a diagnosis before completing the consultation.');
+      return;
+    }
+
+    this.loading = true;
 
     const consultationData = {
       diagnosis: this.diagnosis(),
@@ -320,39 +371,38 @@ export class DoctorDashboardComponent implements OnInit {
       })),
     };
 
-    // Try creating/updating consultation first, then complete appointment
-    this.appointmentService.createConsultation(patient.appointmentId, consultationData).subscribe({
+    // 1. Write Consultation (Upsert)
+    this.appointmentService.writeConsultation(patient.appointmentId, consultationData).subscribe({
       next: () => {
+        // 2. Complete Appointment status
         this.appointmentService.completeAppointment(patient.appointmentId).subscribe({
-          next: () => this.removePatientFromQueue(patient),
-          error: () => this.removePatientFromQueue(patient),
+          next: () => {
+            this.loading = false;
+            this.showSuccess('Consultation completed successfully');
+            this.clearForm();
+            this.loadQueue(); // Refresh entire queue from server
+          },
+          error: () => {
+            this.loading = false;
+            this.loadQueue();
+          },
         });
       },
-      error: () => {
-        // If create fails (already exists), try updating
-        this.appointmentService.updateConsultation(patient.appointmentId, consultationData).subscribe({
-          next: () => {
-            this.appointmentService.completeAppointment(patient.appointmentId).subscribe({
-              next: () => this.removePatientFromQueue(patient),
-              error: () => this.removePatientFromQueue(patient),
-            });
-          },
-          error: () => this.removePatientFromQueue(patient),
-        });
+      error: (err) => {
+        this.loading = false;
+        console.error('Failed to save consultation:', err);
+        alert('Failed to save consultation. Please try again.');
       },
     });
   }
 
-  private removePatientFromQueue(patient: QueuePatient) {
-    this.queue.update(q => q.filter(p => p.id !== patient.id));
-    const remaining = this.queue();
-    this.selectedPatient.set(remaining.length > 0 ? remaining[0] : null);
-    this.activeCount.update(c => Math.max(0, c - 1));
+  private clearForm() {
     this.diagnosis.set('');
     this.clinicalNotes.set('');
     this.prescriptions.set([]);
     this.diagnosticTests.set([]);
   }
+
 
   // --- Prescription management ---
   addPrescription() {
@@ -378,10 +428,23 @@ export class DoctorDashboardComponent implements OnInit {
       this.diagnosticTests.update(t => [...t, test]);
       this.newTestInput.set('');
     }
+    this.showTestDropdown.set(false);
+  }
+
+  selectTestType(type: { code: string, name: string }) {
+    if (!this.diagnosticTests().includes(type.name)) {
+      this.diagnosticTests.update(t => [...t, type.name]);
+    }
+    this.newTestInput.set('');
+    this.showTestDropdown.set(false);
   }
 
   removeTest(index: number) {
     this.diagnosticTests.update(t => t.filter((_, i) => i !== index));
+  }
+
+  trackByPrescription(index: number): number {
+    return index;
   }
 
   onTestKeydown(event: KeyboardEvent) {
@@ -396,17 +459,18 @@ export class DoctorDashboardComponent implements OnInit {
     this.appointmentService.confirmAppointment(req.id).subscribe({
       next: () => {
         this.appointmentRequests.update(list => list.filter(r => r.id !== req.id));
+        this.loadQueue();
       },
-      error: () => {},
+      error: () => { },
     });
   }
 
-  declineRequest(req: AppointmentRequest) {
-    this.appointmentService.declineAppointment(req.id, 'Declined by doctor').subscribe({
+  cancelRequest(req: AppointmentRequest) {
+    this.appointmentService.cancelAppointment(req.id, 'Cancelled by doctor').subscribe({
       next: () => {
         this.appointmentRequests.update(list => list.filter(r => r.id !== req.id));
       },
-      error: () => {},
+      error: () => { },
     });
   }
 
@@ -416,8 +480,9 @@ export class DoctorDashboardComponent implements OnInit {
       this.appointmentService.confirmAppointment(req.id).subscribe({
         next: () => {
           this.appointmentRequests.update(list => list.filter(r => r.id !== req.id));
+          this.loadQueue();
         },
-        error: () => {},
+        error: () => { },
       });
     });
   }

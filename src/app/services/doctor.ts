@@ -9,6 +9,10 @@ export class DoctorService {
   private api = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
+  
+  createDoctor(data: any): Observable<any> {
+    return this.http.post(`${this.api}/doctors/create`, data);
+  }
 
   getAllDoctors(): Observable<DoctorsResponse> {
     return this.http.get<DoctorsResponse>(`${this.api}/doctors/`);

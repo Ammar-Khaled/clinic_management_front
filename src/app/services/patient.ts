@@ -14,6 +14,10 @@ export class PatientService {
     return this.http.get<PatientProfile>(`${this.api}/patients/me`);
   }
 
+  getPatientById(id: number | string): Observable<PatientProfile> {
+    return this.http.get<PatientProfile>(`${this.api}/patients/${id}`);
+  }
+
   updateProfile(data: Partial<PatientProfile>): Observable<PatientProfile> {
     return this.http.patch<PatientProfile>(`${this.api}/patients/me`, data);
   }
