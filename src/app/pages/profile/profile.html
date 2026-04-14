@@ -1,44 +1,59 @@
 <!-- Top Nav -->
-<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex items-center justify-between px-6 py-3">
+<nav
+  class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex items-center justify-between px-6 py-3"
+>
   <div class="flex items-center gap-4">
-    <button (click)="goBack()" class="flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors">
+    <button
+      (click)="goBack()"
+      class="flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors"
+    >
       <span class="material-symbols-outlined text-sm">arrow_back</span>
       Dashboard
     </button>
     <span class="font-headline text-xl font-bold text-blue-900">Clinical Curator</span>
   </div>
-  <button (click)="logout()"
-          class="h-9 w-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
-          title="Logout">
+  <button
+    (click)="logout()"
+    class="h-9 w-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary"
+    title="Logout"
+  >
     <span class="material-symbols-outlined text-sm">logout</span>
   </button>
 </nav>
 
 <main class="max-w-2xl mx-auto pt-24 pb-12 px-6">
-
   <!-- Loading -->
   <div *ngIf="loading" class="flex justify-center py-20">
-    <span class="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+    <span class="material-symbols-outlined animate-spin text-primary text-4xl"
+      >progress_activity</span
+    >
   </div>
 
   <!-- Messages -->
-  <div *ngIf="successMsg"
-       class="mb-6 p-4 rounded-2xl bg-secondary-fixed/30 text-on-secondary-fixed-variant text-sm font-medium flex items-center gap-2">
+  <div
+    *ngIf="successMsg"
+    class="mb-6 p-4 rounded-2xl bg-secondary-fixed/30 text-on-secondary-fixed-variant text-sm font-medium flex items-center gap-2"
+  >
     <span class="material-symbols-outlined text-sm">check_circle</span>
     {{ successMsg }}
   </div>
-  <div *ngIf="errorMsg && !loading"
-       class="mb-6 p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2">
+  <div
+    *ngIf="errorMsg && !loading"
+    class="mb-6 p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2"
+  >
     <span class="material-symbols-outlined text-sm">error</span>
     {{ errorMsg }}
   </div>
 
   <div *ngIf="!loading && profile">
-
     <!-- Header Card -->
-    <div class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden mb-8">
+    <div
+      class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden mb-8"
+    >
       <div class="bg-gradient-to-br from-primary to-primary-container p-8 text-center">
-        <div class="w-24 h-24 rounded-full border-4 border-white/20 bg-white/10 flex items-center justify-center mx-auto mb-4">
+        <div
+          class="w-24 h-24 rounded-full border-4 border-white/20 bg-white/10 flex items-center justify-center mx-auto mb-4"
+        >
           <span class="material-symbols-outlined text-white text-4xl">{{ getGenderIcon() }}</span>
         </div>
         <h1 class="text-2xl font-headline font-extrabold text-white">{{ patientName }}</h1>
@@ -49,8 +64,10 @@
       <!-- View Mode -->
       <div *ngIf="!editing" class="p-8">
         <div class="flex justify-end mb-4">
-          <button (click)="startEdit()"
-                  class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-primary hover:bg-blue-50 transition-colors">
+          <button
+            (click)="startEdit()"
+            class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-primary hover:bg-blue-50 transition-colors"
+          >
             <span class="material-symbols-outlined text-sm">edit</span>
             Edit Profile
           </button>
@@ -62,7 +79,9 @@
               <span class="material-symbols-outlined text-primary">cake</span>
               <span class="text-sm font-medium text-slate-600">Date of Birth</span>
             </div>
-            <span class="text-sm font-bold text-blue-900">{{ formatDate(profile.date_of_birth) }}</span>
+            <span class="text-sm font-bold text-blue-900">{{
+              formatDate(profile.date_of_birth)
+            }}</span>
           </div>
 
           <div class="bg-slate-50 p-4 rounded-2xl flex items-center justify-between">
@@ -70,7 +89,9 @@
               <span class="material-symbols-outlined text-primary">{{ getGenderIcon() }}</span>
               <span class="text-sm font-medium text-slate-600">Gender</span>
             </div>
-            <span class="text-sm font-bold text-blue-900 capitalize">{{ profile.gender?.toLowerCase() }}</span>
+            <span class="text-sm font-bold text-blue-900 capitalize">{{
+              profile.gender ? profile.gender.toLowerCase() : '—'
+            }}</span>
           </div>
 
           <div class="bg-slate-50 p-4 rounded-2xl flex items-center justify-between">
@@ -110,7 +131,9 @@
               <span class="material-symbols-outlined text-primary">warning</span>
               <span class="text-sm font-medium text-slate-600">Allergies</span>
             </div>
-            <span class="text-sm font-bold text-blue-900">{{ profile.allergies || 'None reported' }}</span>
+            <span class="text-sm font-bold text-blue-900">{{
+              profile.allergies || 'None reported'
+            }}</span>
           </div>
         </div>
       </div>
@@ -121,51 +144,81 @@
 
         <div class="space-y-4">
           <div>
-            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Phone Number</label>
-            <input type="tel" [(ngModel)]="form.phone_number"
-                   class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm" />
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+              >Phone Number</label
+            >
+            <input
+              type="tel"
+              [(ngModel)]="form.phone_number"
+              class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+            />
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Height (cm)</label>
-              <input type="number" [(ngModel)]="form.height"
-                     class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm" />
+              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+                >Height (cm)</label
+              >
+              <input
+                type="number"
+                [(ngModel)]="form.height"
+                class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+              />
             </div>
             <div>
-              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Weight (kg)</label>
-              <input type="number" [(ngModel)]="form.weight"
-                     class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm" />
+              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+                >Weight (kg)</label
+              >
+              <input
+                type="number"
+                [(ngModel)]="form.weight"
+                class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+              />
             </div>
           </div>
 
           <div>
-            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Blood Type</label>
-            <select [(ngModel)]="form.blood_type"
-                    class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm">
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+              >Blood Type</label
+            >
+            <select
+              [(ngModel)]="form.blood_type"
+              class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+            >
               <option value="">Not specified</option>
               <option *ngFor="let bt of bloodTypes" [value]="bt">{{ bt }}</option>
             </select>
           </div>
 
           <div>
-            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Allergies</label>
-            <textarea [(ngModel)]="form.allergies" rows="3"
-                      class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
-                      placeholder="List any known allergies..."></textarea>
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+              >Allergies</label
+            >
+            <textarea
+              [(ngModel)]="form.allergies"
+              rows="3"
+              class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+              placeholder="List any known allergies..."
+            ></textarea>
           </div>
         </div>
 
         <div class="flex gap-3 mt-8">
-          <button (click)="cancelEdit()"
-                  class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+          <button
+            (click)="cancelEdit()"
+            class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+          >
             Cancel
           </button>
-          <button (click)="saveProfile()"
-                  [disabled]="saving"
-                  class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container transition-colors flex items-center justify-center gap-2"
-                  [class.opacity-50]="saving">
-            <span *ngIf="saving" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+          <button
+            (click)="saveProfile()"
+            [disabled]="saving"
+            class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container transition-colors flex items-center justify-center gap-2"
+            [class.opacity-50]="saving"
+          >
+            <span *ngIf="saving" class="material-symbols-outlined animate-spin text-sm"
+              >progress_activity</span
+            >
             {{ saving ? 'Saving...' : 'Save Changes' }}
           </button>
         </div>

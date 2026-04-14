@@ -53,12 +53,12 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private appointmentService: AppointmentService,
     private doctorService: DoctorService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id')
-      || this.route.snapshot.paramMap.get('appointmentId');
+    const idParam =
+      this.route.snapshot.paramMap.get('id') || this.route.snapshot.paramMap.get('appointmentId');
     const id = Number(idParam);
 
     if (!id || isNaN(id)) {
@@ -77,7 +77,7 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
 
   // ==================== LOAD DATA ====================
 
- loadAppointment(id: number): void {
+  loadAppointment(id: number): void {
     this.appointmentService.getAppointmentDetail(id).subscribe({
       next: (data) => {
         this.appointment = data;
@@ -138,21 +138,21 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
         const slots = res.slots || [];
         const matchedSlot = slots.find((s: any) => s.id === appointment.slot_id);
 
-      if (matchedSlot) {
-  this.appointment!.start_datetime = matchedSlot.start_datetime;
-  this.appointment!.end_datetime = matchedSlot.end_datetime;
-  this.appointment!.doctor_id = doctor.id;
-  this.appointment!.doctor_name = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim();
-  this.appointment!.doctor_specialization = doctor.specialization || '';
+        if (matchedSlot) {
+          this.appointment!.start_datetime = matchedSlot.start_datetime;
+          this.appointment!.end_datetime = matchedSlot.end_datetime;
+          this.appointment!.doctor_id = doctor.id;
+          this.appointment!.doctor_name = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim();
+          this.appointment!.doctor_specialization = doctor.specialization || '';
 
-  this.appointmentService.cacheBooking(appointment.id, {
-    doctor_id: doctor.id,
-    doctor_name: `Dr. ${doctor.first_name} ${doctor.last_name}`.trim(),
-    doctor_specialization: doctor.specialization || '',
-    start_datetime: matchedSlot.start_datetime,
-    end_datetime: matchedSlot.end_datetime,
-    session_duration: 0,
-  });
+          this.appointmentService.cacheBooking(appointment.id, {
+            doctor_id: doctor.id,
+            doctor_name: `Dr. ${doctor.first_name} ${doctor.last_name}`.trim(),
+            doctor_specialization: doctor.specialization || '',
+            start_datetime: matchedSlot.start_datetime,
+            end_datetime: matchedSlot.end_datetime,
+            session_duration: 0,
+          });
 
           // Restart countdown if checked in
           if (this.appointment!.status === 'CHECKED_IN') {
@@ -186,15 +186,15 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
       },
     });
   }
-private parseEgyptDate(dateStr: string): Date {
-  if (!dateStr) return new Date();
+  private parseEgyptDate(dateStr: string): Date {
+    if (!dateStr) return new Date();
 
-  return new Date(
-    dateStr
-      .replace('Z', '')   // remove UTC shift
-      .replace(' ', 'T')  // fix Django format
-  );
-}
+    return new Date(
+      dateStr
+        .replace('Z', '') // remove UTC shift
+        .replace(' ', 'T'), // fix Django format
+    );
+  }
   loadRescheduleHistory(appointmentId: number): void {
     this.historyLoading = true;
     this.appointmentService.getRescheduleHistory(appointmentId).subscribe({
@@ -255,17 +255,17 @@ private parseEgyptDate(dateStr: string): Date {
       const elapsed = Math.abs(diff);
       this.waitingMinutes = Math.floor(elapsed / 60000);
       this.waitingSeconds = Math.floor((elapsed % 60000) / 1000);
-      this.waitingLabel = this.waitingMinutes > 0
-        ? `${this.waitingMinutes}m ${this.waitingSeconds}s ago`
-        : `${this.waitingSeconds}s ago`;
+      this.waitingLabel =
+        this.waitingMinutes > 0
+          ? `${this.waitingMinutes}m ${this.waitingSeconds}s ago`
+          : `${this.waitingSeconds}s ago`;
     }
   }
 
   // ==================== CANCEL ====================
 
   get canCancel(): boolean {
-    return !!this.appointment &&
-      ['SCHEDULED', 'CONFIRMED'].includes(this.appointment.status);
+    return !!this.appointment && ['SCHEDULED', 'CONFIRMED'].includes(this.appointment.status);
   }
 
   openCancelModal(): void {
@@ -306,8 +306,7 @@ private parseEgyptDate(dateStr: string): Date {
   // ==================== RESCHEDULE ====================
 
   get canReschedule(): boolean {
-    return !!this.appointment &&
-      ['SCHEDULED', 'CONFIRMED'].includes(this.appointment.status);
+    return !!this.appointment && ['SCHEDULED', 'CONFIRMED'].includes(this.appointment.status);
   }
 
   openRescheduleModal(): void {
@@ -323,7 +322,10 @@ private parseEgyptDate(dateStr: string): Date {
     this.showRescheduleModal = false;
   }
 
-   onRescheduleDateChange(): void {
+  onRescheduleDateChange(value?: string): void {
+    if (typeof value === 'string') {
+      this.rescheduleDate = value;
+    }
     this.rescheduleSlots = [];
     this.selectedRescheduleSlot = null;
     this.rescheduleError = '';
@@ -352,7 +354,7 @@ private parseEgyptDate(dateStr: string): Date {
         next: (res: any) => {
           const allSlots: Slot[] = res.slots || [];
           this.rescheduleSlots = allSlots.filter(
-            (s: Slot) => !s.is_booked && s.id !== this.appointment!.slot_id
+            (s: Slot) => !s.is_booked && s.id !== this.appointment!.slot_id,
           );
           this.rescheduleSlotsLoading = false;
           this.cdr.detectChanges();
@@ -398,9 +400,7 @@ private parseEgyptDate(dateStr: string): Date {
       .subscribe({
         next: (res: any) => {
           const allSlots: Slot[] = res.slots || [];
-          const hasOurSlot = allSlots.some(
-            (s: Slot) => s.id === this.appointment!.slot_id
-          );
+          const hasOurSlot = allSlots.some((s: Slot) => s.id === this.appointment!.slot_id);
 
           if (hasOurSlot) {
             // Found the doctor — save doctor_id for future use
@@ -414,7 +414,7 @@ private parseEgyptDate(dateStr: string): Date {
             }
 
             this.rescheduleSlots = allSlots.filter(
-              (s: Slot) => !s.is_booked && s.id !== this.appointment!.slot_id
+              (s: Slot) => !s.is_booked && s.id !== this.appointment!.slot_id,
             );
             this.rescheduleSlotsLoading = false;
             this.cdr.detectChanges();
@@ -433,7 +433,7 @@ private parseEgyptDate(dateStr: string): Date {
     this.rescheduleError = '';
   }
 
- confirmReschedule(): void {
+  confirmReschedule(): void {
     if (!this.appointment || !this.selectedRescheduleSlot || !this.rescheduleReason.trim()) {
       this.rescheduleError = 'Please select a new slot and provide a reason.';
       return;
@@ -443,43 +443,45 @@ private parseEgyptDate(dateStr: string): Date {
     this.rescheduleError = '';
     this.cdr.detectChanges();
 
-    this.appointmentService.rescheduleAppointment(
-      this.appointment.id,
-      this.selectedRescheduleSlot.id,
-      this.rescheduleReason
-    ).subscribe({
-      next: () => {
-        const newSlot = this.selectedRescheduleSlot!;
+    this.appointmentService
+      .rescheduleAppointment(
+        this.appointment.id,
+        this.selectedRescheduleSlot.id,
+        this.rescheduleReason,
+      )
+      .subscribe({
+        next: () => {
+          const newSlot = this.selectedRescheduleSlot!;
 
-        // Update local appointment state
-        this.appointment!.status = 'SCHEDULED';
-        this.appointment!.start_datetime = newSlot.start_datetime;
-        this.appointment!.end_datetime = newSlot.end_datetime;
-        this.appointment!.slot_id = newSlot.id;
+          // Update local appointment state
+          this.appointment!.status = 'SCHEDULED';
+          this.appointment!.start_datetime = newSlot.start_datetime;
+          this.appointment!.end_datetime = newSlot.end_datetime;
+          this.appointment!.slot_id = newSlot.id;
 
-        // Update cache — create entry if it doesn't exist
-        this.appointmentService.cacheBooking(this.appointment!.id, {
-          doctor_id: this.appointment!.doctor_id || 0,
-          doctor_name: this.appointment!.doctor_name || '',
-          doctor_specialization: this.appointment!.doctor_specialization || '',
-          start_datetime: newSlot.start_datetime,
-          end_datetime: newSlot.end_datetime,
-          session_duration: this.appointment!.session_duration || 0,
-        });
+          // Update cache — create entry if it doesn't exist
+          this.appointmentService.cacheBooking(this.appointment!.id, {
+            doctor_id: this.appointment!.doctor_id || 0,
+            doctor_name: this.appointment!.doctor_name || '',
+            doctor_specialization: this.appointment!.doctor_specialization || '',
+            start_datetime: newSlot.start_datetime,
+            end_datetime: newSlot.end_datetime,
+            session_duration: this.appointment!.session_duration || 0,
+          });
 
-        this.showRescheduleModal = false;
-        this.rescheduleInProgress = false;
+          this.showRescheduleModal = false;
+          this.rescheduleInProgress = false;
 
-        // Reload history
-        this.loadRescheduleHistory(this.appointment!.id);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.rescheduleInProgress = false;
-        this.rescheduleError = err.error?.message || 'Failed to reschedule appointment.';
-        this.cdr.detectChanges();
-      },
-    });
+          // Reload history
+          this.loadRescheduleHistory(this.appointment!.id);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.rescheduleInProgress = false;
+          this.rescheduleError = err.error?.message || 'Failed to reschedule appointment.';
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   // ==================== NAVIGATION ====================
@@ -513,52 +515,52 @@ private parseEgyptDate(dateStr: string): Date {
     };
     return map[status] || 'help';
   }
-formatDate(dateStr: string): string {
-  if (!dateStr) return '—';
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '—';
 
-  const d = this.parseEgyptDate(dateStr);
+    const d = this.parseEgyptDate(dateStr);
 
-  return d.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
 
-formatShortDate(dateStr: string): string {
-  if (!dateStr) return '—';
+  formatShortDate(dateStr: string): string {
+    if (!dateStr) return '—';
 
-  const d = this.parseEgyptDate(dateStr);
+    const d = this.parseEgyptDate(dateStr);
 
-  return d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
 
-formatTime(dateStr: string): string {
-  if (!dateStr) return '';
+  formatTime(dateStr: string): string {
+    if (!dateStr) return '';
 
-  const d = this.parseEgyptDate(dateStr);
+    const d = this.parseEgyptDate(dateStr);
 
-  return d.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-}
+    return d.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
 
-formatSlotTime(dateStr: string): string {
-  if (!dateStr) return '';
+  formatSlotTime(dateStr: string): string {
+    if (!dateStr) return '';
 
-  const d = this.parseEgyptDate(dateStr);
+    const d = this.parseEgyptDate(dateStr);
 
-  return d.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-}
+    return d.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
 }

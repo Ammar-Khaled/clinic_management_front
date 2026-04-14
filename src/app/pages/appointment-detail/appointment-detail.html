@@ -1,6 +1,11 @@
 <!-- Top Nav -->
-<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex items-center px-6 py-3">
-  <button (click)="goBack()" class="flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors">
+<nav
+  class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm shadow-blue-900/5 flex items-center px-6 py-3"
+>
+  <button
+    (click)="goBack()"
+    class="flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors"
+  >
     <span class="material-symbols-outlined text-sm">arrow_back</span>
     Back to Dashboard
   </button>
@@ -8,26 +13,32 @@
 </nav>
 
 <main class="max-w-3xl mx-auto pt-24 pb-12 px-6">
-
   <!-- Loading -->
   <div *ngIf="loading" class="flex justify-center py-20">
-    <span class="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+    <span class="material-symbols-outlined animate-spin text-primary text-4xl"
+      >progress_activity</span
+    >
   </div>
 
   <!-- Error -->
-  <div *ngIf="errorMsg"
-       class="p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2">
+  <div
+    *ngIf="errorMsg"
+    class="p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2"
+  >
     <span class="material-symbols-outlined text-sm">error</span>
     {{ errorMsg }}
   </div>
 
   <div *ngIf="!loading && appointment">
-
     <!-- ==================== APPOINTMENT HEADER CARD ==================== -->
-    <div class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden mb-8">
+    <div
+      class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden mb-8"
+    >
       <div class="bg-gradient-to-br from-primary to-primary-container p-8">
         <div class="flex items-center justify-between mb-3">
-          <span class="inline-block px-3 py-1 rounded text-[10px] font-bold uppercase bg-white/20 text-white">
+          <span
+            class="inline-block px-3 py-1 rounded text-[10px] font-bold uppercase bg-white/20 text-white"
+          >
             {{ appointment.status }}
           </span>
           <span class="text-white/50 text-sm font-label">#APT-{{ appointment.id }}</span>
@@ -52,7 +63,8 @@
           <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Time</p>
           <p class="font-headline font-bold text-blue-900">
             <span *ngIf="appointment.start_datetime">
-              {{ formatTime(appointment.start_datetime) }} — {{ formatTime(appointment.end_datetime) }}
+              {{ formatTime(appointment.start_datetime) }} —
+              {{ formatTime(appointment.end_datetime) }}
             </span>
             <span *ngIf="!appointment.start_datetime">—</span>
           </p>
@@ -60,31 +72,45 @@
         <div class="bg-slate-50 p-4 rounded-2xl">
           <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Status</p>
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm" [ngClass]="getStatusBadgeClass(appointment.status)">
+            <span
+              class="material-symbols-outlined text-sm"
+              [ngClass]="getStatusBadgeClass(appointment.status)"
+            >
               {{ getStatusIcon(appointment.status) }}
             </span>
-            <span class="px-2 py-0.5 rounded text-xs font-bold" [ngClass]="getStatusBadgeClass(appointment.status)">
+            <span
+              class="px-2 py-0.5 rounded text-xs font-bold"
+              [ngClass]="getStatusBadgeClass(appointment.status)"
+            >
               {{ appointment.status }}
             </span>
           </div>
         </div>
         <div class="bg-slate-50 p-4 rounded-2xl">
-          <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Booked On</p>
-          <p class="font-headline font-bold text-blue-900">{{ formatShortDate(appointment.created_at) }}</p>
+          <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">
+            Booked On
+          </p>
+          <p class="font-headline font-bold text-blue-900">
+            {{ formatShortDate(appointment.created_at) }}
+          </p>
         </div>
       </div>
 
       <!-- Action Buttons (Cancel / Reschedule) -->
       <div *ngIf="canCancel || canReschedule" class="px-8 pb-8 flex gap-3">
-        <button *ngIf="canReschedule"
-                (click)="openRescheduleModal()"
-                class="flex-1 py-3 rounded-xl text-sm font-bold text-primary border-2 border-primary/20 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+        <button
+          *ngIf="canReschedule"
+          (click)="openRescheduleModal()"
+          class="flex-1 py-3 rounded-xl text-sm font-bold text-primary border-2 border-primary/20 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+        >
           <span class="material-symbols-outlined text-sm">event_repeat</span>
           Reschedule
         </button>
-        <button *ngIf="canCancel"
-                (click)="openCancelModal()"
-                class="flex-1 py-3 rounded-xl text-sm font-bold text-error border-2 border-error/20 hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
+        <button
+          *ngIf="canCancel"
+          (click)="openCancelModal()"
+          class="flex-1 py-3 rounded-xl text-sm font-bold text-error border-2 border-error/20 hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+        >
           <span class="material-symbols-outlined text-sm">cancel</span>
           Cancel Appointment
         </button>
@@ -92,12 +118,18 @@
     </div>
 
     <!-- ==================== WAITING TIME (CHECKED_IN) ==================== -->
-    <div *ngIf="appointment.status === 'CHECKED_IN'"
-         class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm p-8 mb-8 text-center">
-      <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-           [ngClass]="waitingPast ? 'bg-green-100' : 'bg-secondary-fixed/30'">
-        <span class="material-symbols-outlined text-2xl"
-              [ngClass]="waitingPast ? 'text-green-700' : 'text-secondary'">
+    <div
+      *ngIf="appointment.status === 'CHECKED_IN'"
+      class="bg-white rounded-3xl border border-outline-variant/30 shadow-sm p-8 mb-8 text-center"
+    >
+      <div
+        class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+        [ngClass]="waitingPast ? 'bg-green-100' : 'bg-secondary-fixed/30'"
+      >
+        <span
+          class="material-symbols-outlined text-2xl"
+          [ngClass]="waitingPast ? 'text-green-700' : 'text-secondary'"
+        >
           {{ waitingPast ? 'notifications_active' : 'schedule' }}
         </span>
       </div>
@@ -106,22 +138,29 @@
         {{ waitingPast ? 'Your Turn!' : 'Waiting for Your Appointment' }}
       </h3>
       <p class="text-slate-500 text-sm mb-4">
-        {{ waitingPast ? 'Your appointment time has arrived' : 'You\'ve been checked in. Please wait.' }}
+        {{
+          waitingPast ? 'Your appointment time has arrived' : "You've been checked in. Please wait."
+        }}
       </p>
 
-      <div class="inline-block px-8 py-4 rounded-2xl"
-           [ngClass]="waitingPast ? 'bg-green-50' : 'bg-slate-50'">
+      <div
+        class="inline-block px-8 py-4 rounded-2xl"
+        [ngClass]="waitingPast ? 'bg-green-50' : 'bg-slate-50'"
+      >
         <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">
           {{ waitingPast ? 'Started' : 'Starts In' }}
         </p>
-        <p class="text-3xl font-headline font-extrabold"
-           [ngClass]="waitingPast ? 'text-green-700' : 'text-blue-900'">
+        <p
+          class="text-3xl font-headline font-extrabold"
+          [ngClass]="waitingPast ? 'text-green-700' : 'text-blue-900'"
+        >
           {{ waitingLabel }}
         </p>
       </div>
 
       <p class="text-xs text-slate-400 mt-4">
-        Scheduled: {{ formatTime(appointment.start_datetime) }} — {{ formatTime(appointment.end_datetime) }}
+        Scheduled: {{ formatTime(appointment.start_datetime) }} —
+        {{ formatTime(appointment.end_datetime) }}
       </p>
     </div>
 
@@ -136,8 +175,10 @@
         <span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
       </div>
 
-      <div *ngIf="!consultationLoading && !consultation"
-           class="bg-white rounded-3xl border border-outline-variant/30 p-8 text-center shadow-sm mb-8">
+      <div
+        *ngIf="!consultationLoading && !consultation"
+        class="bg-white rounded-3xl border border-outline-variant/30 p-8 text-center shadow-sm mb-8"
+      >
         <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">description</span>
         <p class="text-slate-500 text-sm">No consultation record available yet.</p>
       </div>
@@ -153,38 +194,52 @@
         </div>
 
         <!-- Notes -->
-        <div *ngIf="consultation.notes" class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+        <div
+          *ngIf="consultation.notes"
+          class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm"
+        >
           <div class="flex items-center gap-2 mb-3">
             <span class="material-symbols-outlined text-primary text-lg">notes</span>
             <h3 class="font-headline font-bold text-blue-900">Doctor Notes</h3>
           </div>
-          <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ consultation.notes }}</p>
+          <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">
+            {{ consultation.notes }}
+          </p>
         </div>
 
         <!-- Tests -->
-        <div *ngIf="consultation.tests?.length" class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+        <div
+          *ngIf="consultation.tests.length"
+          class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm"
+        >
           <div class="flex items-center gap-2 mb-3">
             <span class="material-symbols-outlined text-primary text-lg">biotech</span>
             <h3 class="font-headline font-bold text-blue-900">Requested Tests</h3>
           </div>
           <div class="flex flex-wrap gap-2">
-            <span *ngFor="let test of consultation.tests"
-                  class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold">
+            <span
+              *ngFor="let test of consultation.tests"
+              class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold"
+            >
               {{ test }}
             </span>
           </div>
         </div>
 
         <!-- Prescriptions -->
-        <div *ngIf="consultation.prescriptions?.length"
-             class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm">
+        <div
+          *ngIf="consultation.prescriptions.length"
+          class="bg-white rounded-3xl border border-outline-variant/30 p-6 shadow-sm"
+        >
           <div class="flex items-center gap-2 mb-4">
             <span class="material-symbols-outlined text-primary text-lg">medication</span>
             <h3 class="font-headline font-bold text-blue-900">Prescriptions</h3>
           </div>
           <div class="space-y-3">
-            <div *ngFor="let rx of consultation.prescriptions"
-                 class="bg-slate-50 rounded-2xl p-4 flex items-center justify-between">
+            <div
+              *ngFor="let rx of consultation.prescriptions"
+              class="bg-slate-50 rounded-2xl p-4 flex items-center justify-between"
+            >
               <div>
                 <p class="font-bold text-blue-900">{{ rx.drug_name }}</p>
                 <p class="text-xs text-slate-500">{{ rx.dose }}</p>
@@ -210,10 +265,16 @@
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="text-xs text-slate-500 mb-1">
-                  <span class="font-bold text-blue-900">{{ formatShortDate(h.old_start_datetime) }}</span>
+                  <span class="font-bold text-blue-900">{{
+                    formatShortDate(h.old_start_datetime)
+                  }}</span>
                   {{ formatTime(h.old_start_datetime) }}
-                  <span class="material-symbols-outlined text-xs align-middle mx-1 text-slate-400">arrow_forward</span>
-                  <span class="font-bold text-primary">{{ formatShortDate(h.new_start_datetime) }}</span>
+                  <span class="material-symbols-outlined text-xs align-middle mx-1 text-slate-400"
+                    >arrow_forward</span
+                  >
+                  <span class="font-bold text-primary">{{
+                    formatShortDate(h.new_start_datetime)
+                  }}</span>
                   {{ formatTime(h.new_start_datetime) }}
                 </p>
                 <p class="text-xs text-slate-500">Reason: {{ h.reason }}</p>
@@ -229,16 +290,22 @@
     </div>
 
     <!-- ==================== CANCELLED INFO ==================== -->
-    <div *ngIf="appointment.status === 'CANCELLED'"
-         class="bg-white rounded-3xl border border-error/20 shadow-sm p-8 mb-8 text-center">
+    <div
+      *ngIf="appointment.status === 'CANCELLED'"
+      class="bg-white rounded-3xl border border-error/20 shadow-sm p-8 mb-8 text-center"
+    >
       <span class="material-symbols-outlined text-4xl text-error/50 mb-3">event_busy</span>
       <h3 class="font-headline font-bold text-blue-900 mb-1">Appointment Cancelled</h3>
-      <p class="text-slate-500 text-sm">This appointment has been cancelled and the time slot has been freed.</p>
+      <p class="text-slate-500 text-sm">
+        This appointment has been cancelled and the time slot has been freed.
+      </p>
     </div>
 
     <!-- ==================== NO SHOW INFO ==================== -->
-    <div *ngIf="appointment.status === 'NO_SHOW'"
-         class="bg-white rounded-3xl border border-error/20 shadow-sm p-8 mb-8 text-center">
+    <div
+      *ngIf="appointment.status === 'NO_SHOW'"
+      class="bg-white rounded-3xl border border-error/20 shadow-sm p-8 mb-8 text-center"
+    >
       <span class="material-symbols-outlined text-4xl text-error/50 mb-3">person_off</span>
       <h3 class="font-headline font-bold text-blue-900 mb-1">Marked as No-Show</h3>
       <p class="text-slate-500 text-sm">You were marked as a no-show for this appointment.</p>
@@ -247,8 +314,10 @@
 </main>
 
 <!-- ==================== CANCEL MODAL ==================== -->
-<div *ngIf="showCancelModal"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+<div
+  *ngIf="showCancelModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+>
   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
     <div class="flex items-center gap-3 mb-6">
       <div class="w-12 h-12 rounded-xl bg-error-container flex items-center justify-center">
@@ -260,30 +329,42 @@
       </div>
     </div>
 
-    <div *ngIf="cancelError"
-         class="mb-4 p-3 rounded-xl bg-error-container text-on-error-container text-sm flex items-center gap-2">
+    <div
+      *ngIf="cancelError"
+      class="mb-4 p-3 rounded-xl bg-error-container text-on-error-container text-sm flex items-center gap-2"
+    >
       <span class="material-symbols-outlined text-sm">error</span>
       {{ cancelError }}
     </div>
 
     <div class="mb-6">
-      <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Reason for Cancellation *</label>
-      <textarea [(ngModel)]="cancelReason"
-                rows="3"
-                class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
-                placeholder="Please explain why you're cancelling..."></textarea>
+      <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+        >Reason for Cancellation *</label
+      >
+      <textarea
+        [(ngModel)]="cancelReason"
+        rows="3"
+        class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+        placeholder="Please explain why you're cancelling..."
+      ></textarea>
     </div>
 
     <div class="flex gap-3">
-      <button (click)="closeCancelModal()"
-              class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+      <button
+        (click)="closeCancelModal()"
+        class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+      >
         Keep Appointment
       </button>
-      <button (click)="confirmCancel()"
-              [disabled]="cancelInProgress || !cancelReason.trim()"
-              class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-error hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-              [class.opacity-50]="cancelInProgress || !cancelReason.trim()">
-        <span *ngIf="cancelInProgress" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+      <button
+        (click)="confirmCancel()"
+        [disabled]="cancelInProgress || !cancelReason.trim()"
+        class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-error hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+        [class.opacity-50]="cancelInProgress || !cancelReason.trim()"
+      >
+        <span *ngIf="cancelInProgress" class="material-symbols-outlined animate-spin text-sm"
+          >progress_activity</span
+        >
         {{ cancelInProgress ? 'Cancelling...' : 'Confirm Cancel' }}
       </button>
     </div>
@@ -291,8 +372,10 @@
 </div>
 
 <!-- ==================== RESCHEDULE MODAL ==================== -->
-<div *ngIf="showRescheduleModal"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+<div
+  *ngIf="showRescheduleModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+>
   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto">
     <div class="flex items-center gap-3 mb-6">
       <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -304,8 +387,10 @@
       </div>
     </div>
 
-    <div *ngIf="rescheduleError"
-         class="mb-4 p-3 rounded-xl bg-error-container text-on-error-container text-sm flex items-center gap-2">
+    <div
+      *ngIf="rescheduleError"
+      class="mb-4 p-3 rounded-xl bg-error-container text-on-error-container text-sm flex items-center gap-2"
+    >
       <span class="material-symbols-outlined text-sm">error</span>
       {{ rescheduleError }}
     </div>
@@ -313,10 +398,12 @@
     <!-- Date Picker -->
     <div class="mb-4">
       <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">New Date</label>
-      <input type="date"
-             [(ngModel)]="rescheduleDate"
-             (change)="onRescheduleDateChange()"
-             class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm" />
+      <input
+        type="date"
+        [(ngModel)]="rescheduleDate"
+        (ngModelChange)="onRescheduleDateChange($event)"
+        class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+      />
     </div>
 
     <!-- Slots Loading -->
@@ -326,8 +413,10 @@
     </div>
 
     <!-- No Slots -->
-    <p *ngIf="!rescheduleSlotsLoading && rescheduleDate && rescheduleSlots.length === 0"
-       class="text-xs text-slate-500 py-4 text-center">
+    <p
+      *ngIf="!rescheduleSlotsLoading && rescheduleDate && rescheduleSlots.length === 0"
+      class="text-xs text-slate-500 py-4 text-center"
+    >
       No available slots for this date. Try another date.
     </p>
 
@@ -335,12 +424,16 @@
     <div *ngIf="!rescheduleSlotsLoading && rescheduleSlots.length > 0" class="mb-4">
       <p class="text-xs font-bold text-slate-500 mb-3">Available Times</p>
       <div class="flex flex-wrap gap-2">
-        <button *ngFor="let slot of rescheduleSlots"
-                (click)="selectRescheduleSlot(slot)"
-                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                [ngClass]="selectedRescheduleSlot?.id === slot.id
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-slate-100 hover:bg-primary hover:text-white'">
+        <button
+          *ngFor="let slot of rescheduleSlots"
+          (click)="selectRescheduleSlot(slot)"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          [ngClass]="
+            selectedRescheduleSlot?.id === slot.id
+              ? 'bg-primary text-white shadow-md'
+              : 'bg-slate-100 hover:bg-primary hover:text-white'
+          "
+        >
           {{ formatSlotTime(slot.start_datetime) }}
         </button>
       </div>
@@ -348,24 +441,36 @@
 
     <!-- Reason -->
     <div *ngIf="selectedRescheduleSlot" class="mb-6">
-      <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Reason for Rescheduling *</label>
-      <textarea [(ngModel)]="rescheduleReason"
-                rows="2"
-                class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
-                placeholder="Why are you rescheduling?"></textarea>
+      <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
+        >Reason for Rescheduling *</label
+      >
+      <textarea
+        [(ngModel)]="rescheduleReason"
+        rows="2"
+        class="w-full mt-1 bg-slate-50 border border-outline-variant rounded-lg px-4 py-3 text-sm"
+        placeholder="Why are you rescheduling?"
+      ></textarea>
     </div>
 
     <!-- Actions -->
     <div class="flex gap-3">
-      <button (click)="closeRescheduleModal()"
-              class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+      <button
+        (click)="closeRescheduleModal()"
+        class="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+      >
         Cancel
       </button>
-      <button (click)="confirmReschedule()"
-              [disabled]="rescheduleInProgress || !selectedRescheduleSlot || !rescheduleReason.trim()"
-              class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container transition-colors flex items-center justify-center gap-2"
-              [class.opacity-50]="rescheduleInProgress || !selectedRescheduleSlot || !rescheduleReason.trim()">
-        <span *ngIf="rescheduleInProgress" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+      <button
+        (click)="confirmReschedule()"
+        [disabled]="rescheduleInProgress || !selectedRescheduleSlot || !rescheduleReason.trim()"
+        class="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-container transition-colors flex items-center justify-center gap-2"
+        [class.opacity-50]="
+          rescheduleInProgress || !selectedRescheduleSlot || !rescheduleReason.trim()
+        "
+      >
+        <span *ngIf="rescheduleInProgress" class="material-symbols-outlined animate-spin text-sm"
+          >progress_activity</span
+        >
         {{ rescheduleInProgress ? 'Rescheduling...' : 'Confirm Reschedule' }}
       </button>
     </div>

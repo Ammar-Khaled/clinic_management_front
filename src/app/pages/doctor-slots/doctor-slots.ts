@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DoctorService } from '../../services/doctor';
 import { AppointmentService } from '../../services/appointment';
@@ -8,7 +9,7 @@ import { Slot } from '../../models/doctor.model';
 @Component({
   selector: 'app-doctor-slots',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './doctor-slots.html',
   styleUrl: './doctor-slots.css',
 })
@@ -30,7 +31,7 @@ export class DoctorSlotsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private doctorService: DoctorService,
-    private appointmentService: AppointmentService
+    private appointmentService: AppointmentService,
   ) {}
 
   ngOnInit(): void {
@@ -50,19 +51,17 @@ export class DoctorSlotsComponent implements OnInit {
   loadSlots(): void {
     this.loading = true;
     this.errorMsg = '';
-    this.doctorService
-      .getDoctorSlots(this.doctorId, this.startDate, this.endDate)
-      .subscribe({
-        next: (res) => {
-          this.slots = res.slots.filter((s) => !s.is_booked);
-          this.groupByDate();
-          this.loading = false;
-        },
-        error: () => {
-          this.errorMsg = 'Failed to load slots.';
-          this.loading = false;
-        },
-      });
+    this.doctorService.getDoctorSlots(this.doctorId, this.startDate, this.endDate).subscribe({
+      next: (res) => {
+        this.slots = res.slots.filter((s) => !s.is_booked);
+        this.groupByDate();
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMsg = 'Failed to load slots.';
+        this.loading = false;
+      },
+    });
   }
 
   groupByDate(): void {
@@ -77,8 +76,8 @@ export class DoctorSlotsComponent implements OnInit {
       .map(([date, slots]) => ({ date, slots }));
   }
 
-  onDateChange(type: 'start' | 'end', event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
+  onDateChange(type: 'start' | 'end', value: string): void {
+    const val = value || '';
     if (type === 'start') this.startDate = val;
     else this.endDate = val;
     this.loadSlots();
@@ -117,8 +116,7 @@ export class DoctorSlotsComponent implements OnInit {
       error: (err) => {
         this.booking = false;
         this.bookingSlotId = null;
-        this.errorMsg =
-          err.error?.error || 'Failed to book appointment. Please try again.';
+        this.errorMsg = err.error?.error || 'Failed to book appointment. Please try again.';
       },
     });
   }

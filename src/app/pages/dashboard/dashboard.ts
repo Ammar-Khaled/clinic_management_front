@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit {
     private doctorService: DoctorService,
     private appointmentService: AppointmentService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -83,15 +83,15 @@ export class DashboardComponent implements OnInit {
       },
     });
   }
-private parseEgyptDate(dateStr: string): Date {
-  if (!dateStr) return new Date();
+  private parseEgyptDate(dateStr: string): Date {
+    if (!dateStr) return new Date();
 
-  return new Date(
-    dateStr
-      .replace('Z', '')   // remove UTC shift
-      .replace(' ', 'T')  // fix Django format
-  );
-}
+    return new Date(
+      dateStr
+        .replace('Z', '') // remove UTC shift
+        .replace(' ', 'T'), // fix Django format
+    );
+  }
   // ==================== DOCTORS & BOOKING ====================
 
   loadDoctors(): void {
@@ -100,9 +100,7 @@ private parseEgyptDate(dateStr: string): Date {
         this.doctors = res.doctors;
         this.specializations = this.doctorService.getSpecializations(res.doctors);
         this.filteredDoctors = [...this.doctors];
-        this.doctorMap = new Map(
-          this.doctors.map((d: Doctor) => [d.id, d])
-        );
+        this.doctorMap = new Map(this.doctors.map((d: Doctor) => [d.id, d]));
         this.doctorsLoaded = true;
         this.cdr.detectChanges();
 
@@ -118,15 +116,13 @@ private parseEgyptDate(dateStr: string): Date {
   onSpecChange(): void {
     if (this.selectedSpec) {
       this.filteredDoctors = this.doctors.filter(
-        (d: Doctor) => d.specialization === this.selectedSpec
+        (d: Doctor) => d.specialization === this.selectedSpec,
       );
     } else {
       this.filteredDoctors = [...this.doctors];
     }
     if (this.selectedDoctorId) {
-      const stillValid = this.filteredDoctors.some(
-        (d: Doctor) => d.id === this.selectedDoctorId
-      );
+      const stillValid = this.filteredDoctors.some((d: Doctor) => d.id === this.selectedDoctorId);
       if (!stillValid) {
         this.selectedDoctorId = null;
         this.availableSlots = [];
@@ -145,7 +141,10 @@ private parseEgyptDate(dateStr: string): Date {
     }
   }
 
-  onDateChange(): void {
+  onDateChange(value?: string): void {
+    if (typeof value === 'string') {
+      this.bookingDate = value;
+    }
     this.availableSlots = [];
     this.selectedSlot = null;
     this.bookingError = '';
@@ -190,12 +189,8 @@ private parseEgyptDate(dateStr: string): Date {
     this.cdr.detectChanges();
 
     const slot = this.selectedSlot;
-    const doctor = this.doctors.find(
-      (d: Doctor) => d.id === this.selectedDoctorId
-    );
-    const doctorName = doctor
-      ? `Dr. ${doctor.first_name} ${doctor.last_name}`.trim()
-      : '';
+    const doctor = this.doctors.find((d: Doctor) => d.id === this.selectedDoctorId);
+    const doctorName = doctor ? `Dr. ${doctor.first_name} ${doctor.last_name}`.trim() : '';
 
     this.appointmentService.bookAppointment(slot.id).subscribe({
       next: (apt: any) => {
@@ -218,8 +213,7 @@ private parseEgyptDate(dateStr: string): Date {
       },
       error: (err: any) => {
         this.bookingInProgress = false;
-        this.bookingError =
-          err.error?.error || 'Failed to book appointment.';
+        this.bookingError = err.error?.error || 'Failed to book appointment.';
         this.cdr.detectChanges();
       },
     });
@@ -251,10 +245,10 @@ private parseEgyptDate(dateStr: string): Date {
 
   private splitAppointments(): void {
     this.upcomingAppointments = this.appointments.filter((a: Appointment) =>
-      ['SCHEDULED', 'CONFIRMED', 'CHECKED_IN'].includes(a.status)
+      ['SCHEDULED', 'CONFIRMED', 'CHECKED_IN'].includes(a.status),
     );
     this.pastAppointments = this.appointments.filter((a: Appointment) =>
-      ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status)
+      ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(a.status),
     );
   }
 
@@ -264,9 +258,7 @@ private parseEgyptDate(dateStr: string): Date {
     if (!this.doctorsLoaded || !this.appointmentsLoaded) return;
 
     // Find appointments that have no cached doctor_name and still have a valid slot
-    const uncached = this.appointments.filter(
-      a => !a.doctor_name && a.slot_id && a.slot_id > 0
-    );
+    const uncached = this.appointments.filter((a) => !a.doctor_name && a.slot_id && a.slot_id > 0);
 
     if (uncached.length === 0) return;
 
@@ -277,7 +269,7 @@ private parseEgyptDate(dateStr: string): Date {
   private resolveFromDoctor(doctorIndex: number, uncached: Appointment[]): void {
     // Stop if we've checked all doctors or resolved all appointments
     if (doctorIndex >= this.doctors.length) return;
-    if (uncached.every(a => a.doctor_name)) return;
+    if (uncached.every((a) => a.doctor_name)) return;
 
     const doctor = this.doctors[doctorIndex];
     const today = new Date();
@@ -388,42 +380,42 @@ private parseEgyptDate(dateStr: string): Date {
     return map[status] || 'bg-slate-100 text-slate-400';
   }
 
-formatDate(dateStr: string): string {
-  if (!dateStr) return '—';
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '—';
 
-  const d = this.parseEgyptDate(dateStr);
+    const d = this.parseEgyptDate(dateStr);
 
-  return d.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-formatTime(dateStr: string): string {
-  if (!dateStr) return '';
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+  formatTime(dateStr: string): string {
+    if (!dateStr) return '';
 
-  const d = new Date(dateStr.replace(' ', 'T')); 
+    const d = new Date(dateStr.replace(' ', 'T'));
 
-  return d.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-}
-formatSlotTime(dateStr: string): string {
-  if (!dateStr) return '';
+    return d.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+  formatSlotTime(dateStr: string): string {
+    if (!dateStr) return '';
 
-  const fixed = dateStr.replace('Z', '');
+    const fixed = dateStr.replace('Z', '');
 
-  const d = new Date(fixed);
+    const d = new Date(fixed);
 
-  return d.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-}
+    return d.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
 
   private toDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
