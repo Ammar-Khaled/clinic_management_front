@@ -40,6 +40,18 @@ export class AuthService {
       );
   }
 
+  loginWithGoogle(idToken: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.api}/auth/google/`, { "id_token": idToken })
+      .pipe(
+        tap(res => {
+          localStorage.setItem('access_token', res.access);
+          localStorage.setItem('refresh_token', res.refresh);
+          this._isLoggedIn$.next(true);
+        })
+      );
+  }
+
   getUserDetails(id: string): Observable<any> {
     return this.http.get(`${this.api}/users/${id}/`);
   }

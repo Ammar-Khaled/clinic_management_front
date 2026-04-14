@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import 'tailwindcss';
-
 @theme {
   --color-error: #ba1a1a;
   --color-on-surface: #191c1e;

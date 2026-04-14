@@ -1,17 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { SocialAuthService, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, GoogleSigninButtonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   form: FormGroup;
   errorMsg = '';
   successMsg = '';
@@ -20,6 +21,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
+    private socialAuth: SocialAuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -33,48 +35,68 @@ export class LoginComponent {
     }
   }
 
+  ngOnInit(): void {
+    this.socialAuth.authState.subscribe((user) => {
+      if (user && user.idToken) {
+        this.onGoogleLogin(user.idToken);
+      }
+    });
+  }
+
+  onGoogleLogin(idToken: string): void {
+    this.loading = true;
+    this.errorMsg = '';
+    this.auth.loginWithGoogle(idToken).subscribe({
+      next: (res) => this.handleAuthSuccess(res.access),
+      error: (err) => {
+        this.loading = false;
+        this.errorMsg = err.error?.detail || 'Google authentication failed.';
+      },
+    });
+  }
+
   onSubmit(): void {
     if (this.form.invalid) return;
     this.loading = true;
     this.errorMsg = '';
 
     this.auth.login(this.form.value).subscribe({
-      next: (res) => {
-        let returnUrl = this.route.snapshot.queryParams['returnUrl'];
-        try {
-          const payloadStr = atob(res.access.split('.')[1]);
-          const payload = JSON.parse(payloadStr);
-          const role = (payload.role || '').toUpperCase();
-
-          if (!returnUrl) {
-            switch (role) {
-              case 'ADMIN':
-                returnUrl = '/admin-dashboard';
-                break;
-              case 'DOCTOR':
-                returnUrl = '/doctor-dashboard';
-                break;
-              case 'RECEPTIONIST':
-                returnUrl = '/receptionist';
-                break;
-              case 'PATIENT':
-              default:
-                returnUrl = '/dashboard';
-            }
-          }
-        } catch (e) {
-          console.warn('Error parsing token payload:', e);
-        }
-        
-        // Ensure returning users fallback to root if empty
-        if (!returnUrl) returnUrl = '/dashboard';
-        
-        this.router.navigateByUrl(returnUrl);
-      },
+      next: (res) => this.handleAuthSuccess(res.access),
       error: (err) => {
         this.loading = false;
         this.errorMsg = err.error?.detail || 'Invalid username or password.';
       },
     });
+  }
+
+  private handleAuthSuccess(accessToken: string): void {
+    let returnUrl = this.route.snapshot.queryParams['returnUrl'];
+    try {
+      const payloadStr = atob(accessToken.split('.')[1]);
+      const payload = JSON.parse(payloadStr);
+      const role = (payload.role || '').toUpperCase();
+
+      if (!returnUrl) {
+        switch (role) {
+          case 'ADMIN':
+            returnUrl = '/admin-dashboard';
+            break;
+          case 'DOCTOR':
+            returnUrl = '/doctor-dashboard';
+            break;
+          case 'RECEPTIONIST':
+            returnUrl = '/receptionist';
+            break;
+          case 'PATIENT':
+          default:
+            returnUrl = '/dashboard';
+        }
+      }
+    } catch (e) {
+      console.warn('Error parsing token payload:', e);
+    }
+    
+    if (!returnUrl) returnUrl = '/dashboard';
+    this.router.navigateByUrl(returnUrl);
   }
 }
