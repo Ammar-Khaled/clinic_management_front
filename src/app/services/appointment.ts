@@ -62,12 +62,8 @@ export class AppointmentService {
     );
   }
 
-  createConsultation(appointmentId: number | string, data: any): Observable<Consultation> {
-    return this.http.post<Consultation>(`${this.api}/appointments/${appointmentId}/consultation`, data);
-  }
-
-  updateConsultation(appointmentId: number | string, data: any): Observable<Consultation> {
-    return this.http.patch<Consultation>(`${this.api}/appointments/${appointmentId}/consultation`, data);
+  writeConsultation(appointmentId: number | string, data: any): Observable<Consultation> {
+    return this.http.post<Consultation>(`${this.api}/appointments/${appointmentId}/consultation/write`, data);
   }
 
   // --- Admin & Queues (used by AdminDashboard — DO NOT REMOVE) ---
@@ -120,7 +116,7 @@ export class AppointmentService {
   }
 
   noShowAppointment(id: number | string): Observable<any> {
-    return this.http.patch(`${this.api}/appointments/${id}/no-show`, {});
+    return this.http.patch(`${this.api}/appointments/${id}/no-show`, { status: 'NO_SHOW' });
   }
 
   declineAppointment(id: number | string, reason: string): Observable<any> {
