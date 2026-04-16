@@ -21,4 +21,8 @@ export class PatientService {
   updateProfile(data: Partial<PatientProfile>): Observable<PatientProfile> {
     return this.http.patch<PatientProfile>(`${this.api}/patients/me`, data);
   }
+
+  completeProfile(data: PatientProfile): Observable<PatientProfile> {
+    return this.http.post<PatientProfile>(`${this.api}/patients/complete-profile/`, data);
+  }
 }

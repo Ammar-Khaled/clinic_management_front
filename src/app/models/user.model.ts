@@ -6,6 +6,15 @@ export interface LoginRequest {
 export interface LoginResponse {
   access: string;
   refresh: string;
+  user?: {
+    id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+  is_new?: boolean;
+  has_profile?: boolean;
 }
 
 export interface PatientProfile {

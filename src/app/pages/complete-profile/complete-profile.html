@@ -1,0 +1,123 @@
+<div class="min-h-screen bg-surface flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-2xl">
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary-container mb-4 shadow-sm">
+        <span class="material-symbols-outlined text-on-secondary-container text-3xl">patient_list</span>
+      </div>
+      <h1 class="text-3xl font-headline font-extrabold text-blue-900">Complete Your Profile</h1>
+      <p class="text-slate-500 text-sm mt-1 font-label">We need a few more details to set up your clinical portal</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-surface-container-lowest rounded-3xl shadow-xl shadow-blue-900/5 p-8 md:p-10 border border-outline-variant/10">
+
+      <!-- Error Message -->
+      <div *ngIf="errorMsg"
+           class="mb-6 p-4 rounded-2xl bg-error-container text-on-error-container text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+        <span class="material-symbols-outlined text-sm">error</span>
+        {{ errorMsg }}
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Date of Birth -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Date of Birth</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">calendar_today</span>
+              <input formControlName="date_of_birth" type="date"
+                     class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary transition-all" />
+            </div>
+          </div>
+
+          <!-- Gender -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Gender</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">wc</span>
+              <select formControlName="gender"
+                      class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary appearance-none transition-all">
+                <option value="" disabled>Select gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Phone Number</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">call</span>
+              <input formControlName="phone_number" type="tel" placeholder="+20 123 456 7890"
+                     class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary transition-all" />
+            </div>
+          </div>
+
+          <!-- Blood Type -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Blood Type</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">bloodtype</span>
+              <select formControlName="blood_type"
+                      class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary appearance-none transition-all">
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Height -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Height (cm)</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">height</span>
+              <input formControlName="height" type="number" placeholder="175"
+                     class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary transition-all" />
+            </div>
+          </div>
+
+          <!-- Weight -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Weight (kg)</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">monitor_weight</span>
+              <input formControlName="weight" type="number" placeholder="70"
+                     class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary transition-all" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Allergies -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] uppercase tracking-wider font-bold text-slate-400 block ml-1">Allergies</label>
+          <div class="relative group">
+            <span class="material-symbols-outlined absolute left-3 top-4 text-slate-400 group-focus-within:text-primary transition-colors">warning</span>
+            <textarea formControlName="allergies" rows="3" placeholder="List any allergies (e.g., Penicillin, Peanuts) or type 'None'"
+                      class="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-container-low border-0 text-sm text-on-surface focus:ring-2 focus:ring-primary transition-all resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-4">
+          <button type="submit"
+                  [disabled]="form.invalid || loading"
+                  class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl py-4 font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <span *ngIf="loading" class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+            {{ loading ? 'Saving Profile...' : 'Complete Registration' }}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>

@@ -73,47 +73,58 @@
         </div>
 
         <!-- Filters -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Date -->
           <div class="space-y-1.5">
-            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
-              >Date</label
-            >
-            <input
-              type="date"
-              [(ngModel)]="bookingDate"
-              (ngModelChange)="onDateChange($event)"
-              class="w-full bg-slate-50 border-outline-variant rounded-lg text-sm"
-            />
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider ml-1">Date</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-xl">calendar_today</span>
+              <input
+                type="date"
+                [(ngModel)]="bookingDate"
+                (ngModelChange)="onDateChange($event)"
+                class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-outline-variant/50 rounded-xl text-sm text-on-surface focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none"
+              />
+            </div>
           </div>
+
+          <!-- Specialization -->
           <div class="space-y-1.5">
-            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
-              >Specialization</label
-            >
-            <select
-              [(ngModel)]="selectedSpec"
-              (ngModelChange)="onSpecChange()"
-              class="w-full bg-slate-50 border-outline-variant rounded-lg text-sm"
-            >
-              <option value="">All Specializations</option>
-              <option *ngFor="let spec of specializations" [value]="spec">{{ spec }}</option>
-            </select>
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider ml-1">Specialization</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-xl">medical_services</span>
+              <select
+                [(ngModel)]="selectedSpec"
+                (ngModelChange)="onSpecChange()"
+                class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-outline-variant/50 rounded-xl text-sm text-on-surface focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none appearance-none cursor-pointer"
+              >
+                <option value="">All Specializations</option>
+                <option *ngFor="let spec of specializations" [value]="spec">{{ spec }}</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+            </div>
           </div>
+
+          <!-- Select Doctor -->
           <div class="space-y-1.5">
-            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"
-              >Select Doctor</label
-            >
-            <select
-              [(ngModel)]="selectedDoctorId"
-              (ngModelChange)="onDoctorChange()"
-              class="w-full bg-slate-50 border-outline-variant rounded-lg text-sm"
-            >
-              <option [ngValue]="null">Choose a doctor...</option>
-              <option *ngFor="let doc of filteredDoctors" [ngValue]="doc.id">
-                Dr. {{ doc.first_name }} {{ doc.last_name }} — {{ doc.specialization }}
-              </option>
-            </select>
+            <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider ml-1">Select Doctor</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-xl">person</span>
+              <select
+                [(ngModel)]="selectedDoctorId"
+                (ngModelChange)="onDoctorChange()"
+                class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-outline-variant/50 rounded-xl text-sm text-on-surface focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all outline-none appearance-none cursor-pointer"
+              >
+                <option [ngValue]="null">Choose a doctor...</option>
+                <option *ngFor="let doc of filteredDoctors" [ngValue]="doc.id">
+                  Dr. {{ doc.first_name }} {{ doc.last_name }}
+                </option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+            </div>
           </div>
         </div>
+
 
         <!-- Slots -->
         <div class="space-y-2">

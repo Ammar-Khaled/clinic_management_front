@@ -19,6 +19,12 @@ export const routes: Routes = [
       import('./pages/signup/signup').then(m => m.SignupComponent),
   },
   {
+    path: 'complete-profile',
+    loadComponent: () =>
+      import('./pages/complete-profile/complete-profile').then(m => m.CompleteProfileComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'doctor-signup',
     loadComponent: () =>
       import('./pages/doctor-signup/doctor-signup').then(m => m.DoctorSignupComponent),

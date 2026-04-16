@@ -74,7 +74,7 @@ export class AuthService {
       
       this.http.post(
         `${this.api}/auth/logout`, 
-        { refresh_token: refresh },
+        { refresh: refresh },
         { headers }
       ).subscribe({
         complete: () => this.clearSession(),

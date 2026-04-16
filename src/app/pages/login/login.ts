@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
     this.loading = true;
     this.errorMsg = '';
     this.auth.loginWithGoogle(idToken).subscribe({
-      next: (res) => this.handleAuthSuccess(res.access),
+      next: (res) => this.handleAuthSuccess(res),
       error: (err) => {
         this.loading = false;
         this.errorMsg = err.error?.detail || 'Google authentication failed.';
@@ -61,7 +61,7 @@ export class LoginComponent implements OnInit {
     this.errorMsg = '';
 
     this.auth.login(this.form.value).subscribe({
-      next: (res) => this.handleAuthSuccess(res.access),
+      next: (res) => this.handleAuthSuccess(res),
       error: (err) => {
         this.loading = false;
         this.errorMsg = err.error?.detail || 'Invalid username or password.';
@@ -69,12 +69,21 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  private handleAuthSuccess(accessToken: string): void {
+  private handleAuthSuccess(res: any): void {
+    const accessToken = res.access;
     let returnUrl = this.route.snapshot.queryParams['returnUrl'];
     try {
       const payloadStr = atob(accessToken.split('.')[1]);
       const payload = JSON.parse(payloadStr);
-      const role = (payload.role || '').toUpperCase();
+      
+      // Get role from user object in response or fallback to payload
+      const role = (res.user?.role || payload.role || '').toUpperCase();
+
+      // Check if profile completion is required (only for Patients)
+      if (res.has_profile === false && role === 'PATIENT') {
+        this.router.navigate(['/complete-profile']);
+        return;
+      }
 
       if (!returnUrl) {
         switch (role) {
