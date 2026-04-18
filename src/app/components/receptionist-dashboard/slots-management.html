@@ -18,7 +18,7 @@
       <p class="text-on-surface-variant text-lg">Manage availability and synchronize booking windows across doctors.</p>
     </div>
     <button
-      class="flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary to-primary-container px-6 py-3 font-semibold text-on-primary shadow-lg disabled:opacity-60"
+      class="flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary to-primary-container px-6 py-3 font-semibold text-on-primary shadow-lg shadow-primary/20 transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] disabled:opacity-60"
       [disabled]="regenerating"
       (click)="regenerateForAllDoctors()"
     >
@@ -41,7 +41,7 @@
         <select class="w-full rounded-xl border-none bg-surface-container-lowest px-4 py-3" [(ngModel)]="selectedDoctorId" (ngModelChange)="loadSlots()">
           <option [ngValue]="null">Select doctor</option>
           <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
-            Doctor #{{ doctor.id }} - {{ doctor.specialization }}
+            {{ doctorDisplayName(doctor) }} - {{ doctor.specialization }}
           </option>
         </select>
       </div>
@@ -56,7 +56,10 @@
         <input type="date" class="w-full rounded-xl border-none bg-surface-container-lowest px-4 py-3" [(ngModel)]="endDate" />
       </div>
 
-      <button class="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white" (click)="loadSlots()">
+      <button 
+        class="h-12 rounded-xl bg-primary px-8 text-sm font-bold text-white shadow-md shadow-primary/10 transition-all duration-200 hover:bg-primary/90 hover:shadow-lg active:scale-95" 
+        (click)="loadSlots()"
+      >
         Load
       </button>
     </div>

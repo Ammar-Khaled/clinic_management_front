@@ -224,14 +224,15 @@ export class RescheduleCardComponent implements OnChanges {
   }
 
   formatSlot(slot: Slot): string {
-    const start = new Date(slot.start_datetime);
-    if (Number.isNaN(start.getTime())) return `Slot #${slot.id}`;
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    if (!slot.start_datetime) return `Slot #${slot.id}`;
+    // Show raw date + raw time part
+    const datePart = slot.start_datetime.split('T')[0];
+    const timePart = slot.start_datetime.split('T')[1].substring(0, 5);
+    return `${datePart} ${timePart}`;
   }
 
   doctorDisplayName(doctor: Doctor): string {
-    const full = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
-    if (full) return `Dr. ${full}`;
-    return `Doctor #${doctor.id}`;
+    const name = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+    return name ? `Dr. ${name} (#${doctor.id})` : `Doctor #${doctor.id}`;
   }
 }

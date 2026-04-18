@@ -106,7 +106,10 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.doctorService.getAllDoctors().subscribe({
       next: (res) => {
         this.doctors = res.doctors;
-        this.selectedDoctorId = this.doctors.length > 0 ? this.doctors[0].id : null;
+        // Only set default if no doctor is currently selected
+        if (!this.selectedDoctorId && this.doctors.length > 0) {
+          this.selectedDoctorId = this.doctors[0].id;
+        }
         this.loadingDoctors = false;
         this.cdr.detectChanges();
         this.loadDoctorAvailability();
@@ -122,20 +125,24 @@ export class ReceptionistDashboardComponent implements OnInit {
 
   onFiltersChanged(): void {
     this.selectedAppointmentFilterId = null;
-    this.loadAppointmentFilterOptions();
-    this.loadAppointments();
-    this.loadDoctorAvailability();
-    this.loadCheckedInQueue();
+    this.refreshData();
   }
 
   onAppointmentFilterChanged(): void {
     this.loadAppointments();
   }
 
+  refreshData(): void {
+    this.loadAppointmentFilterOptions();
+    this.loadAppointments();
+    this.loadDoctorAvailability();
+    this.loadCheckedInQueue();
+  }
+
   loadAppointments(): void {
     this.loadingAppointments = true;
-    this.successMessage = '';
     this.errorMessage = '';
+    this.cdr.detectChanges(); // Ensure spinner shows up immediately
 
     const trimmedSearch = this.searchText.trim();
     const appointmentId = Number(trimmedSearch);
@@ -225,6 +232,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.actionBusy = true;
     this.successMessage = '';
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.appointmentService.confirmAppointment(appointmentId).subscribe({
       next: () => {
@@ -246,6 +254,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.checkInBusy = true;
     this.successMessage = '';
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.appointmentService.checkInAppointment(appointmentId).subscribe({
       next: () => {
@@ -267,6 +276,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.actionBusy = true;
     this.successMessage = '';
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.appointmentService.noShowAppointment(appointmentId).subscribe({
       next: () => {
@@ -293,6 +303,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.actionBusy = true;
     this.successMessage = '';
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.appointmentService.cancelAppointment(appointmentId, reason.trim()).subscribe({
       next: () => {
@@ -332,6 +343,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.actionBusy = true;
     this.successMessage = '';
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     this.appointmentService
       .rescheduleAppointment(payload.appointmentId, payload.newSlotId, payload.reason)
@@ -346,8 +358,7 @@ export class ReceptionistDashboardComponent implements OnInit {
           this.successMessage = `Appointment #${payload.appointmentId} moved successfully.`;
           this.actionBusy = false;
           this.cdr.detectChanges();
-          this.loadAppointments();
-          this.loadCheckedInQueue();
+          this.refreshData(); // Unified refresh
         },
         error: () => {
           this.actionBusy = false;
@@ -440,9 +451,8 @@ export class ReceptionistDashboardComponent implements OnInit {
 
   doctorDisplayName(doctor: Doctor | null | undefined): string {
     if (!doctor) return 'Unknown Doctor';
-    const full = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
-    if (full) return `Dr. ${full}`;
-    return `Doctor #${doctor.id}`;
+    const name = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+    return name ? `Dr. ${name} (#${doctor.id})` : `Doctor #${doctor.id}`;
   }
 
   receptionistName(): string {
@@ -467,17 +477,15 @@ export class ReceptionistDashboardComponent implements OnInit {
     reason: string,
   ): string {
     const oldTime = appointment?.slot?.start_datetime
-      ? new Date(appointment.slot.start_datetime).toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+      ? (appointment.slot.start_datetime.includes('T') 
+          ? appointment.slot.start_datetime.split('T')[1].substring(0, 5)
+          : appointment.slot.start_datetime.substring(0, 5))
       : 'unknown';
 
     const newTime = slot?.start_datetime
-      ? new Date(slot.start_datetime).toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-        })
+      ? (slot.start_datetime.includes('T')
+          ? slot.start_datetime.split('T')[1].substring(0, 5)
+          : slot.start_datetime.substring(0, 5))
       : 'unknown';
 
     return `Audit trail entry: APT-${appointment?.id ?? 'N/A'} moved from ${oldTime} to ${newTime} (Reason: ${reason})`;

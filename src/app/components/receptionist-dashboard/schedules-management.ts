@@ -73,7 +73,7 @@ export class SchedulesManagementComponent implements OnInit {
     private doctorService: DoctorService,
     private receptionistService: ReceptionistService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadDoctors();
@@ -168,22 +168,22 @@ export class SchedulesManagementComponent implements OnInit {
 
     const payload: CreateDoctorAvailabilityRequest = this.similarWeekdays
       ? {
-          similar_weekdays: 'true',
-          availability: [
-            {
-              start_time: this.uniformStartTime,
-              end_time: this.uniformEndTime,
-            },
-          ],
-        }
+        similar_weekdays: 'true',
+        availability: [
+          {
+            start_time: this.uniformStartTime,
+            end_time: this.uniformEndTime,
+          },
+        ],
+      }
       : {
-          similar_weekdays: 'false',
-          availability: this.weekdayRows.map((row) => ({
-            day_of_week: String(row.day_of_week),
-            start_time: row.start_time,
-            end_time: row.end_time,
-          })),
-        };
+        similar_weekdays: 'false',
+        availability: this.weekdayRows.map((row) => ({
+          day_of_week: String(row.day_of_week),
+          start_time: row.start_time,
+          end_time: row.end_time,
+        })),
+      };
 
     this.savingSchedule = true;
     this.resetMessages();
@@ -325,6 +325,10 @@ export class SchedulesManagementComponent implements OnInit {
     });
   }
 
+  get selectedDoctor(): Doctor | null {
+    return this.doctors.find((d) => d.id === this.selectedDoctorId) || null;
+  }
+
   isExtraWorkingDay(): boolean {
     return this.exceptionType === 'EXTRA_WORKING_DAY';
   }
@@ -339,6 +343,36 @@ export class SchedulesManagementComponent implements OnInit {
 
   formatExceptionTime(value: string | null): string {
     return value ? value.slice(0, 5) : '-';
+  }
+
+  doctorDisplayName(doctor: Doctor | null | undefined): string {
+    if (!doctor) return 'Unknown Doctor';
+    const name = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+    return name ? `Dr. ${name} (#${doctor.id})` : `Doctor #${doctor.id}`;
+  }
+
+  getDayName(day: number | string | undefined | null): string {
+    if (day === null || day === undefined) return '-';
+
+    // If it's a date string (contains -), get the day name from the date
+    if (typeof day === 'string' && day.includes('-')) {
+      const date = new Date(day);
+      if (Number.isNaN(date.getTime())) return day;
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+
+    // Otherwise treat as numeric day_of_week (0=Sat, 1=Sun, etc.)
+    const dayNum = Number(day);
+    const dayNames = [
+      'Saturday',
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+    ];
+    return dayNames[dayNum] || `Day ${day}`;
   }
 
   private hydrateScheduleFormFromApi(): void {

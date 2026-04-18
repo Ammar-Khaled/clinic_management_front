@@ -71,9 +71,9 @@ import { AppointmentListItem } from '../../../models/appointment.model';
                 </p>
               </td>
               <td class="px-6 py-5">
-                <span class="text-xs font-medium text-slate-600">{{
-                  item.doctor?.name || '-'
-                }}</span>
+                <span class="text-xs font-medium text-slate-600">
+                  {{ getDoctorName(item.doctor) }}
+                </span>
               </td>
               <td class="px-6 py-5">
                 <span
@@ -86,31 +86,25 @@ import { AppointmentListItem } from '../../../models/appointment.model';
               <td class="px-6 py-5 text-right">
                 <div class="flex justify-end gap-2" *ngIf="item.status === 'SCHEDULED'">
                   <button
-                    class="rounded-lg border border-green-100 px-3 py-1.5 text-[10px] font-bold text-green-600 transition-all hover:bg-green-50"
+                    class="rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-[10px] font-bold text-green-700 shadow-sm transition-all duration-200 hover:bg-green-100 active:scale-95"
                     (click)="confirm.emit(item.id)"
                   >
                     CONFIRM
                   </button>
                   <button
-                    class="rounded-lg border border-primary/15 px-3 py-1.5 text-[10px] font-bold text-primary transition-all hover:bg-primary/5"
+                    class="rounded-lg border border-primary/20 bg-primary/5 px-3 py-1.5 text-[10px] font-bold text-primary shadow-sm transition-all duration-200 hover:bg-primary/10 active:scale-95"
                     (click)="checkIn.emit(item.id)"
                   >
                     CHECK-IN
                   </button>
                   <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-primary transition-all hover:bg-primary/5"
-                    (click)="startReschedule.emit(item.id)"
-                  >
-                    RESCHEDULE
-                  </button>
-                  <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-rose-700 transition-all hover:bg-rose-50"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-[10px] font-bold text-rose-700 shadow-sm transition-all duration-200 hover:bg-rose-100 active:scale-95"
                     (click)="noShow.emit(item.id)"
                   >
                     NO-SHOW
                   </button>
                   <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-slate-600 transition-all hover:bg-slate-100"
+                    class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-bold text-slate-500 shadow-sm transition-all duration-200 hover:bg-slate-100 active:scale-95"
                     (click)="cancel.emit(item.id)"
                   >
                     CANCEL
@@ -118,37 +112,25 @@ import { AppointmentListItem } from '../../../models/appointment.model';
                 </div>
                 <div class="flex justify-end gap-2" *ngIf="item.status === 'CONFIRMED'">
                   <button
-                    class="rounded-lg border border-primary/15 px-3 py-1.5 text-[10px] font-bold text-primary transition-all hover:bg-primary/5"
+                    class="rounded-lg border border-primary/20 bg-primary/5 px-3 py-1.5 text-[10px] font-bold text-primary shadow-sm transition-all duration-200 hover:bg-primary/10 active:scale-95"
                     (click)="checkIn.emit(item.id)"
                   >
                     CHECK-IN
                   </button>
                   <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-primary transition-all hover:bg-primary/5"
-                    (click)="startReschedule.emit(item.id)"
-                  >
-                    RESCHEDULE
-                  </button>
-                  <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-rose-700 transition-all hover:bg-rose-50"
+                    class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-[10px] font-bold text-rose-700 shadow-sm transition-all duration-200 hover:bg-rose-100 active:scale-95"
                     (click)="noShow.emit(item.id)"
                   >
                     NO-SHOW
                   </button>
                   <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-slate-600 transition-all hover:bg-slate-100"
+                    class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-bold text-slate-500 shadow-sm transition-all duration-200 hover:bg-slate-100 active:scale-95"
                     (click)="cancel.emit(item.id)"
                   >
                     CANCEL
                   </button>
                 </div>
                 <div class="flex justify-end gap-2" *ngIf="item.status === 'CHECKED_IN'">
-                  <button
-                    class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-primary transition-all hover:bg-primary/5"
-                    (click)="startReschedule.emit(item.id)"
-                  >
-                    RESCHEDULE
-                  </button>
                   <button
                     class="rounded-lg px-3 py-1.5 text-[10px] font-bold text-rose-700 transition-all hover:bg-rose-50"
                     (click)="noShow.emit(item.id)"
@@ -196,11 +178,18 @@ export class DailyAppointmentsTableComponent {
     return item.id;
   }
 
+  getDoctorName(doctor: { name: string; id: number } | null | undefined): string {
+    if (!doctor) return 'Unknown doctor';
+    return doctor.name ? `Dr. ${doctor.name} (#${doctor.id})` : 'Unknown doctor';
+  }
+
   formatTime(value?: string | null): string {
     if (!value) return '-';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    // Use raw string processing to match backend format exactly
+    if (value.includes('T')) {
+      return value.split('T')[1].substring(0, 5);
+    }
+    return value.substring(0, 5);
   }
 
   statusLabel(status: string): string {

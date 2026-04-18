@@ -131,10 +131,11 @@ export class DoctorSlotsComponent implements OnInit {
   }
 
   formatTime(dateStr: string): string {
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    if (!dateStr) return '';
+    if (dateStr.includes('T')) {
+      return dateStr.split('T')[1].substring(0, 5);
+    }
+    return dateStr.substring(0, 5);
   }
 
   private toDateString(d: Date): string {

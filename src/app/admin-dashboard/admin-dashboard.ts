@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../services/user';
 import { AppointmentService } from '../services/appointment';
 import { User, DailyAppointmentStat, AppointmentStatusStat, AppointmentsAnalytics, PaginatedResponse } from '../models/user.model';
+import { AuthService } from '../services/auth';
 
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +20,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class AdminDashboard implements OnInit {
   private userService = inject(UserService);
   private appointmentService = inject(AppointmentService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   
   users = signal<User[]>([]);
@@ -287,9 +289,7 @@ export class AdminDashboard implements OnInit {
   }
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   exportCSV() {

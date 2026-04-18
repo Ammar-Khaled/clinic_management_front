@@ -394,27 +394,17 @@ export class DashboardComponent implements OnInit {
   }
   formatTime(dateStr: string): string {
     if (!dateStr) return '';
-
-    const d = new Date(dateStr.replace(' ', 'T'));
-
-    return d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+    if (dateStr.includes('T')) {
+      return dateStr.split('T')[1].substring(0, 5);
+    }
+    return dateStr.substring(0, 5).replace('T', ' ');
   }
   formatSlotTime(dateStr: string): string {
     if (!dateStr) return '';
-
-    const fixed = dateStr.replace('Z', '');
-
-    const d = new Date(fixed);
-
-    return d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+    if (dateStr.includes('T')) {
+      return dateStr.split('T')[1].substring(0, 5);
+    }
+    return dateStr.substring(0, 5);
   }
 
   private toDateStr(d: Date): string {

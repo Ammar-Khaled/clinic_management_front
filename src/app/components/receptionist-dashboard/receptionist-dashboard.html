@@ -3,19 +3,10 @@
     <div class="flex items-center gap-8">
       <span class="font-headline text-xl font-extrabold text-primary">Clinical Curator</span>
       <div class="hidden items-center gap-6 text-sm font-semibold md:flex">
-        <a routerLink="/receptionist/dashboard" class="border-b-2 border-primary pb-1 text-primary"
-          >Dashboard</a
-        >
-        <a
-          routerLink="/receptionist/schedules"
-          class="text-slate-500 transition-colors hover:text-primary"
-          >Schedules</a
-        >
-        <a
-          routerLink="/receptionist/slots"
-          class="text-slate-500 transition-colors hover:text-primary"
-          >Slots</a
-        >
+        <a routerLink="/receptionist/dashboard" class="border-b-2 border-primary pb-1 text-primary">Dashboard</a>
+        <a routerLink="/receptionist/schedules"
+          class="text-slate-500 transition-colors hover:text-primary">Schedules</a>
+        <a routerLink="/receptionist/slots" class="text-slate-500 transition-colors hover:text-primary">Slots</a>
       </div>
     </div>
     <div class="text-right">
@@ -24,16 +15,10 @@
           <p class="text-xs font-bold text-primary">{{ receptionistName() }}</p>
           <p class="text-[10px] text-slate-500">Non-Clinical Access Only</p>
         </div>
-        <img
-          [src]="receptionistAvatar()"
-          alt="Receptionist avatar"
-          class="h-9 w-9 rounded-full border border-slate-200 object-cover"
-        />
-        <button
-          class="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
-          (click)="logout()"
-          title="Logout"
-        >
+        <img [src]="receptionistAvatar()" alt="Receptionist avatar"
+          class="h-9 w-9 rounded-full border border-slate-200 object-cover" />
+        <button class="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+          (click)="logout()" title="Logout">
           <span class="material-symbols-outlined text-lg">logout</span>
         </button>
       </div>
@@ -44,45 +29,44 @@
 <main class="mx-auto min-h-screen max-w-7xl px-6 pb-12 pt-24">
   <header class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
     <div>
-      <h1 class="mb-2 text-4xl font-headline font-extrabold tracking-tight text-on-surface">
-        Receptionist Console
-      </h1>
+      <div class="flex items-center gap-4">
+        <h1 class="mb-2 text-4xl font-headline font-extrabold tracking-tight text-on-surface">
+          Receptionist Console
+        </h1>
+        <button
+          class="flex items-center justify-center rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-primary active:scale-90"
+          (click)="refreshData()" [disabled]="loadingAppointments || loadingDoctors || loadingQueue"
+          title="Refresh All Data">
+          <span class="material-symbols-outlined text-xl"
+            [ngClass]="{ 'animate-spin': loadingAppointments || loadingDoctors || loadingQueue }">
+            refresh
+          </span>
+        </button>
+      </div>
       <p class="text-on-surface-variant/80">Schedule Management and Patient Flow</p>
     </div>
 
     <div class="rounded-xl border border-outline-variant/30 bg-surface-container-low px-4 py-2">
       <div class="flex flex-col">
-        <span class="mb-1 text-[10px] font-bold uppercase leading-none text-slate-400"
-          >Current Date</span
-        >
+        <span class="mb-1 text-[10px] font-bold uppercase leading-none text-slate-400">Current Date</span>
         <span class="text-sm font-semibold text-primary">{{ selectedDate }}</span>
       </div>
     </div>
   </header>
 
-  <div
-    *ngIf="successMessage"
-    class="mb-4 rounded-xl bg-secondary-container/40 px-4 py-3 text-sm text-on-secondary-container"
-  >
+  <div *ngIf="successMessage"
+    class="mb-4 rounded-xl bg-secondary-container/40 px-4 py-3 text-sm text-on-secondary-container">
     {{ successMessage }}
   </div>
-  <div
-    *ngIf="errorMessage"
-    class="mb-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container"
-  >
+  <div *ngIf="errorMessage" class="mb-4 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">
     {{ errorMessage }}
   </div>
 
-  <section
-    class="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
-  >
+  <section class="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
     <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
       <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Doctor</span>
-      <select
-        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
-        [(ngModel)]="selectedDoctorId"
-        (ngModelChange)="onFiltersChanged()"
-      >
+      <select class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        [(ngModel)]="selectedDoctorId" (ngModelChange)="onFiltersChanged()">
         <option [ngValue]="null">All Physicians</option>
         <option *ngFor="let doctor of doctors" [ngValue]="doctor.id">
           {{ doctorDisplayName(doctor) }}
@@ -92,11 +76,8 @@
 
     <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
       <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Appt Status</span>
-      <select
-        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
-        [(ngModel)]="selectedStatus"
-        (ngModelChange)="onFiltersChanged()"
-      >
+      <select class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        [(ngModel)]="selectedStatus" (ngModelChange)="onFiltersChanged()">
         <option *ngFor="let status of statusOptions" [ngValue]="status.value">
           {{ status.label }}
         </option>
@@ -105,21 +86,14 @@
 
     <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
       <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date Range</span>
-      <input
-        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
-        type="date"
-        [(ngModel)]="selectedDate"
-        (ngModelChange)="onFiltersChanged()"
-      />
+      <input class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        type="date" [(ngModel)]="selectedDate" (ngModelChange)="onFiltersChanged()" />
     </div>
 
     <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
       <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Appointment</span>
-      <select
-        class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
-        [(ngModel)]="selectedAppointmentFilterId"
-        (ngModelChange)="onAppointmentFilterChanged()"
-      >
+      <select class="cursor-pointer border-none bg-transparent py-0 text-sm font-semibold text-slate-700 focus:ring-0"
+        [(ngModel)]="selectedAppointmentFilterId" (ngModelChange)="onAppointmentFilterChanged()">
         <option [ngValue]="null">All Appointments</option>
         <option *ngFor="let appointment of appointmentFilterOptions" [ngValue]="appointment.id">
           #APT-{{ appointment.id }} • {{ appointment.patient.name }}
@@ -130,111 +104,63 @@
     <div class="relative w-full md:ml-auto md:w-64">
       <input
         class="w-full rounded-lg border border-slate-100 bg-slate-50 py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/10"
-        placeholder="Patient name or App ID..."
-        type="text"
-        [(ngModel)]="searchText"
-        (keyup.enter)="loadAppointments()"
-      />
-      <span class="material-symbols-outlined absolute left-3 top-2 text-lg text-slate-400"
-        >person_search</span
-      >
+        placeholder="Patient name or App ID..." type="text" [(ngModel)]="searchText"
+        (keyup.enter)="loadAppointments()" />
+      <span class="material-symbols-outlined absolute left-3 top-2 text-lg text-slate-400">person_search</span>
     </div>
 
-    <button
-      class="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white"
-      (click)="loadAppointments()"
-    >
+    <button class="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white" (click)="loadAppointments()">
       Apply
     </button>
   </section>
 
   <section class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-    <app-stat-card
-      title="Selected Doctor"
+    <app-stat-card title="Selected Doctor"
       [value]="selectedDoctor ? doctorDisplayName(selectedDoctor) : 'All Physicians'"
-      [subtitle]="selectedDoctor?.specialization || 'Multi doctor view'"
-      valueClass="text-primary"
-    ></app-stat-card>
-    <app-stat-card
-      title="Daily Appointments"
-      [value]="totalAppointments.toString()"
-      [subtitle]="selectedDate"
-      valueClass="text-on-surface"
-    ></app-stat-card>
-    <app-stat-card
-      title="Flow Snapshot"
-      [value]="checkedInAppointments.toString()"
-      [subtitle]="confirmedAppointments + ' confirmed currently'"
-      valueClass="text-green-700"
-    ></app-stat-card>
+      [subtitle]="selectedDoctor?.specialization || 'Multi doctor view'" valueClass="text-primary"></app-stat-card>
+    <app-stat-card title="Daily Appointments" [value]="totalAppointments.toString()" [subtitle]="selectedDate"
+      valueClass="text-on-surface"></app-stat-card>
+    <app-stat-card title="Flow Snapshot" [value]="checkedInAppointments.toString()"
+      [subtitle]="confirmedAppointments + ' confirmed currently'" valueClass="text-green-700"></app-stat-card>
   </section>
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-    <app-daily-appointments-table
-      class="lg:col-span-8"
-      [appointments]="appointments"
-      [loading]="loadingAppointments || loadingDoctors"
-      (confirm)="confirmAppointment($event)"
-      (checkIn)="checkInAppointment($event)"
-      (noShow)="noShowAppointment($event)"
-      (cancel)="cancelAppointment($event)"
-      (startReschedule)="prepareReschedule($event)"
-    ></app-daily-appointments-table>
+    <app-daily-appointments-table class="lg:col-span-8" [appointments]="appointments"
+      [loading]="loadingAppointments || loadingDoctors" (confirm)="confirmAppointment($event)"
+      (checkIn)="checkInAppointment($event)" (noShow)="noShowAppointment($event)" (cancel)="cancelAppointment($event)"
+      (startReschedule)="prepareReschedule($event)"></app-daily-appointments-table>
 
     <aside class="space-y-6 lg:col-span-4">
-      <app-check-in-card
-        [appointments]="checkInCandidates"
-        [checkedInQueue]="checkedInQueue"
-        [loadingQueue]="loadingQueue"
-        [busy]="checkInBusy"
-        (checkIn)="checkInAppointment($event)"
-      ></app-check-in-card>
+      <app-check-in-card [appointments]="checkInCandidates" [checkedInQueue]="checkedInQueue"
+        [loadingQueue]="loadingQueue" [busy]="checkInBusy" (checkIn)="checkInAppointment($event)"></app-check-in-card>
 
-      <app-reschedule-card
-        [doctors]="doctors"
-        [slots]="rescheduleSlots"
-        [loadingSlots]="loadingRescheduleSlots"
-        [busy]="actionBusy"
-        [auditMessage]="auditTrailMessage"
-        [reschedulableAppointments]="reschedulableAppointments"
-        [preselectedAppointmentId]="focusAppointmentForReschedule"
-        [preselectedDoctorId]="focusRescheduleDoctorId"
-        [preselectedDate]="focusRescheduleDate"
-        (requestSlots)="requestRescheduleSlots($event)"
-        (submit)="submitReschedule($event)"
-      ></app-reschedule-card>
+      <app-reschedule-card [doctors]="doctors" [slots]="rescheduleSlots" [loadingSlots]="loadingRescheduleSlots"
+        [busy]="actionBusy" [auditMessage]="auditTrailMessage" [reschedulableAppointments]="reschedulableAppointments"
+        [preselectedAppointmentId]="focusAppointmentForReschedule" [preselectedDoctorId]="focusRescheduleDoctorId"
+        [preselectedDate]="focusRescheduleDate" (requestSlots)="requestRescheduleSlots($event)"
+        (submit)="submitReschedule($event)"></app-reschedule-card>
 
       <div class="rounded-[2rem] border border-slate-100 bg-white p-6 editorial-shadow">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface">
             Doctor Schedules
           </h3>
-          <a routerLink="/receptionist/schedules" class="text-xs font-bold text-primary"
-            >Edit Rules</a
-          >
+          <a routerLink="/receptionist/schedules" class="text-xs font-bold text-primary">Edit Rules</a>
         </div>
 
         <div *ngIf="loadingAvailability" class="py-6 text-center text-sm text-slate-500">
           Loading schedules...
         </div>
-        <div
-          *ngIf="!loadingAvailability && availability.length === 0"
-          class="py-6 text-center text-sm text-slate-500"
-        >
+        <div *ngIf="!loadingAvailability && availability.length === 0" class="py-6 text-center text-sm text-slate-500">
           No schedules for selected doctor.
         </div>
 
         <div class="space-y-3" *ngIf="!loadingAvailability && availability.length > 0">
-          <div
-            *ngFor="let item of availability; trackBy: trackByAvailabilityId"
-            class="rounded-xl border-l-4 border-primary bg-slate-50 p-3"
-          >
+          <div *ngFor="let item of availability; trackBy: trackByAvailabilityId"
+            class="rounded-xl border-l-4 border-primary bg-slate-50 p-3">
             <div class="mb-1 flex items-center justify-between">
               <span class="text-xs font-bold">{{ dayLabel(item.day_of_week) }}</span>
-              <span
-                class="rounded bg-green-50 px-2 py-0.5 text-[9px] font-bold uppercase text-green-600"
-                >Active</span
-              >
+              <span class="rounded bg-green-50 px-2 py-0.5 text-[9px] font-bold uppercase text-green-600">Active</span>
             </div>
             <p class="text-[10px] font-medium text-slate-500">
               {{ item.start_time }} - {{ item.end_time }}
@@ -242,10 +168,8 @@
           </div>
         </div>
 
-        <a
-          routerLink="/receptionist/slots"
-          class="mt-6 block w-full rounded-xl bg-primary py-3 text-center text-xs font-bold text-white transition-all hover:shadow-lg"
-        >
+        <a routerLink="/receptionist/slots"
+          class="mt-6 block w-full rounded-xl bg-primary py-3 text-center text-xs font-bold text-white transition-all hover:shadow-lg">
           Book Appointment
         </a>
       </div>

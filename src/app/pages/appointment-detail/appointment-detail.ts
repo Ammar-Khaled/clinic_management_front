@@ -542,25 +542,17 @@ export class AppointmentDetailComponent implements OnInit, OnDestroy {
 
   formatTime(dateStr: string): string {
     if (!dateStr) return '';
-
-    const d = this.parseEgyptDate(dateStr);
-
-    return d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+    if (dateStr.includes('T')) {
+      return dateStr.split('T')[1].substring(0, 5);
+    }
+    return dateStr.substring(0, 5).replace('T', ' ');
   }
 
   formatSlotTime(dateStr: string): string {
     if (!dateStr) return '';
-
-    const d = this.parseEgyptDate(dateStr);
-
-    return d.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+    if (dateStr.includes('T')) {
+      return dateStr.split('T')[1].substring(0, 5);
+    }
+    return dateStr.substring(0, 5);
   }
 }

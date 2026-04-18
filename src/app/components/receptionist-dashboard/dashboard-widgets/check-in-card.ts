@@ -57,7 +57,7 @@ import { AppointmentListItem } from '../../../models/appointment.model';
           <p class="font-bold text-on-surface">{{ selectedAppointment.patient.name }}</p>
           <p class="mb-4 text-xs text-slate-500">
             {{ selectedAppointment.status }} with
-            {{ selectedAppointment.doctor?.name || 'Unknown doctor' }}
+            {{ getDoctorName(selectedAppointment.doctor) }}
           </p>
           <button
             class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-xs font-bold text-white transition-all hover:shadow-lg disabled:opacity-60"
@@ -127,10 +127,18 @@ export class CheckInCardComponent {
     return this.appointments.find((item) => item.id === this.appointmentId);
   }
 
+  getDoctorName(doctor: { name: string; id: number } | null | undefined): string {
+    if (!doctor) return 'Unknown doctor';
+    return doctor.name ? `Dr. ${doctor.name} (#${doctor.id})` : 'Unknown doctor';
+  }
+
   formatTime(dateTime: string): string {
-    const date = new Date(dateTime);
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    if (!dateTime) return '-';
+    // If ISO string, extract time. Otherwise return start of string.
+    if (dateTime.includes('T')) {
+      return dateTime.split('T')[1].substring(0, 5);
+    }
+    return dateTime.substring(0, 5);
   }
 
   onCheckIn(): void {

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { DoctorService } from '../../services/doctor';
 import { AppointmentService } from '../../services/appointment';
 import { PatientService } from '../../services/patient';
+import { AuthService } from '../../services/auth';
 import { PatientProfile } from '../../models/user.model';
 
 export interface QueuePatient {
@@ -50,6 +51,7 @@ export class DoctorDashboardComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private appointmentService = inject(AppointmentService);
   private patientService = inject(PatientService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   // --- Doctor profile ---
@@ -172,16 +174,21 @@ export class DoctorDashboardComponent implements OnInit {
           // Format scheduled range: "HH:mm - HH:mm"
           let scheduledTime = '—';
           if (item.scheduled_start_datetime && item.scheduled_end_datetime) {
-            const start = new Date(item.scheduled_start_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-            const end = new Date(item.scheduled_end_datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-            scheduledTime = `${start} - ${end}`;
+            const startStr = item.scheduled_start_datetime.includes('T') 
+              ? item.scheduled_start_datetime.split('T')[1].substring(0, 5)
+              : item.scheduled_start_datetime.substring(0, 5);
+            const endStr = item.scheduled_end_datetime.includes('T')
+              ? item.scheduled_end_datetime.split('T')[1].substring(0, 5)
+              : item.scheduled_end_datetime.substring(0, 5);
+            scheduledTime = `${startStr} - ${endStr}`;
           }
 
           // Actual check-in time for checked-in patients
           let checkInTime = '—';
           if (item.check_in_time) {
-            const date = new Date(item.check_in_time);
-            checkInTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            checkInTime = item.check_in_time.includes('T')
+              ? item.check_in_time.split('T')[1].substring(0, 5)
+              : item.check_in_time.substring(0, 5);
           }
 
           const status = item.status || 'WAITING';
@@ -254,7 +261,9 @@ export class DoctorDashboardComponent implements OnInit {
             name,
             initials,
             date: displayDate
-              ? new Date(displayDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+              ? (displayDate.includes('T') 
+                  ? displayDate.split('T')[0] + ' ' + displayDate.split('T')[1].substring(0, 5)
+                  : displayDate.substring(0, 16).replace('T', ' '))
               : '',
             bgColor: c.bg,
             textColor: c.text,
@@ -493,8 +502,6 @@ export class DoctorDashboardComponent implements OnInit {
   }
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 }

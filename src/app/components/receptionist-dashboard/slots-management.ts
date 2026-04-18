@@ -166,6 +166,12 @@ export class SlotsManagementComponent implements OnInit {
     return type === 'VACATION_DAY' ? 'Vacation Day' : 'Extra Working Day';
   }
 
+  doctorDisplayName(doctor: Doctor | null | undefined): string {
+    if (!doctor) return 'Unknown Doctor';
+    const name = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+    return name ? `Dr. ${name} (#${doctor.id})` : `Doctor #${doctor.id}`;
+  }
+
   private groupSlots(startDate: string, endDate: string, slots: Slot[], exceptions: DoctorException[]): DaySlotGroup[] {
     const map = new Map<string, Slot[]>();
     const exceptionsMap = new Map<string, DoctorException>();
@@ -206,7 +212,7 @@ export class SlotsManagementComponent implements OnInit {
 
   private formatDayHeader(date: Date): string {
     return date.toLocaleDateString('en-US', {
-      weekday: 'short',
+      weekday: 'long',
       month: 'short',
       day: 'numeric',
     });

@@ -36,6 +36,12 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const token = this.auth.getAccessToken();
+    if (token) {
+      this.handleAuthSuccess({ access: token });
+      return;
+    }
+
     this.socialAuth.authState.subscribe((user) => {
       if (user && user.idToken) {
         this.onGoogleLogin(user.idToken);
